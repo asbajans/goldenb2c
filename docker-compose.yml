@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  market-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: golden-market-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://your-backend-api-url/api
+    restart: unless-stopped
