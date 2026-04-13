@@ -1,8 +1,8 @@
-import { fetchProducts } from '@/services/api';
+'use client';
+
+import { useEffect, useState } from 'react';
 import ProductCard from '@/components/ProductCard';
 import styles from './page.module.css';
-
-export const dynamic = 'force-dynamic';
 
 const CATEGORIES = [
   { label: 'Rings', icon: '💍', slug: 'rings' },
@@ -20,9 +20,21 @@ const TRUST_ITEMS = [
   { icon: '✦', title: '100% Authentic', desc: 'Verified gold quality' },
 ];
 
-export default async function Home() {
-  const productsResponse = await fetchProducts(1, 16);
-  const products: any[] = productsResponse?.data || [];
+export default function Home() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/products?page=1&limit=16')
+      .then(r => r.json())
+      .then(data => {
+        setProducts(Array.isArray(data?.data) ? data.data : []);
+        setTotal(data?.pagination?.total ?? 0);
+      })
+      .catch(err => console.error('Product fetch error:', err))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <main className={styles.main}>
@@ -36,7 +48,7 @@ export default async function Home() {
         <div className={styles.heroContent}>
           <span className={styles.heroPill}>✦ &nbsp;Premium Jewelry Marketplace</span>
           <h1 className={styles.heroTitle}>
-            Discover the World's<br />
+            Discover the World&apos;s<br />
             <span className={styles.heroGold}>Finest Gold Craft</span>
           </h1>
           <p className={styles.heroSub}>
@@ -47,7 +59,10 @@ export default async function Home() {
             <a href="/sellers" className={styles.btnSecondary} id="hero-see-sellers">Meet Sellers</a>
           </div>
           <div className={styles.heroStats}>
-            <div className={styles.stat}><strong>{products.length > 0 ? `${productsResponse?.pagination?.total ?? '—'}+` : '—'}</strong><span>Products</span></div>
+            <div className={styles.stat}>
+              <strong>{total > 0 ? `${total}+` : '—'}</strong>
+              <span>Products</span>
+            </div>
             <div className={styles.statDivider} />
             <div className={styles.stat}><strong>150+</strong><span>Verified Sellers</span></div>
             <div className={styles.statDivider} />
@@ -85,26 +100,33 @@ export default async function Home() {
             <a href="/products" className={styles.seeAll}>View all →</a>
           </div>
 
-          {products.length > 0 ? (
+          {loading ? (
+            <div className={styles.productGrid}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className={styles.skeletonCard}>
+                  <div className={styles.skeletonImg} />
+                  <div className={styles.skeletonContent}>
+                    <div className={styles.skeletonLine} />
+                    <div className={styles.skeletonLineShort} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : products.length > 0 ? (
             <div className={styles.productGrid}>
               {products.map((product: any, i: number) => {
-                const imageUrl = product.images && product.images.length > 0
-                  ? product.images[0]
-                  : undefined;
-
-                const isValidImage = imageUrl &&
-                  typeof imageUrl === 'string' &&
-                  (imageUrl.startsWith('http') || imageUrl.startsWith('/'));
+                const imageUrl = product.images?.[0];
+                const isValidImage = imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('http');
 
                 return (
-                  <div key={product.id} style={{ animationDelay: `${i * 0.06}s` }} className={styles.productItem}>
+                  <div key={product.id} style={{ animationDelay: `${i * 0.05}s` }} className={styles.productItem}>
                     <ProductCard
                       id={product.id}
                       title={product.title}
                       price={product.priceTRY ? `₺${Number(product.priceTRY).toLocaleString('tr-TR')}` : '—'}
                       priceUSD={product.priceUSD ? `$${Number(product.priceUSD).toFixed(0)}` : undefined}
                       storeName={product.store?.storeName || 'Golden Store'}
-                      imageUrl={isValidImage ? imageUrl : '/placeholder.jpg'}
+                      imageUrl={isValidImage ? imageUrl : ''}
                       slug={product.slug}
                       category={product.category}
                       isNew={i < 4}
@@ -146,7 +168,7 @@ export default async function Home() {
           <div className={styles.ctaBox}>
             <div className={styles.ctaOrb} />
             <h2 className={styles.ctaTitle}>Sell on Golden Crafters</h2>
-            <p className={styles.ctaSub}>Join hundreds of independent jewelers. AI-powered listings, Etsy & Amazon sync, and instant multi-language storefronts.</p>
+            <p className={styles.ctaSub}>Join hundreds of independent jewelers. AI-powered listings, Etsy &amp; Amazon sync, and instant multi-language storefronts.</p>
             <a href="/sellers/join" className={styles.ctaBtn} id="cta-become-seller">Start Selling Free ✦</a>
           </div>
         </div>
