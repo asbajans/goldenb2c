@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:777/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr/api';
 
 export async function fetchProducts(page = 1, limit = 24) {
   try {
