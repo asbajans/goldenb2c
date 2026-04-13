@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './ProductCard.module.css';
 
 export interface ProductCardProps {
@@ -20,8 +21,14 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
     <Link href={`/p/${slug}`} className={styles.card} id={`product-${id}`}>
       <div className={styles.imageContainer}>
         {hasImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={imageUrl} alt={title} className={styles.image} loading="lazy" />
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className={styles.image}
+            style={{ objectFit: 'cover' }}
+          />
         ) : (
           <div className={styles.imagePlaceholder}>
             <span className={styles.placeholderIcon}>✦</span>

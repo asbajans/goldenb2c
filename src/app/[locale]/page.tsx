@@ -2,6 +2,8 @@ import { fetchProducts } from '@/services/api';
 import ProductCard from '@/components/ProductCard';
 import styles from './page.module.css';
 
+export const dynamic = 'force-dynamic';
+
 const CATEGORIES = [
   { label: 'Rings', icon: '💍', slug: 'rings' },
   { label: 'Necklaces', icon: '📿', slug: 'necklaces' },

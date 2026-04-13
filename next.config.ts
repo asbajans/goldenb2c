@@ -6,7 +6,12 @@ const withNextIntl = createNextIntlPlugin(
 );
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 's3.asb.web.tr' },
+      { protocol: 'https', hostname: 'api.asb.web.tr' },
+    ]
+  }
 };
 
 export default withNextIntl(nextConfig);
