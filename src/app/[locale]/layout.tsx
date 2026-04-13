@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -8,11 +8,17 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import "../globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-playfair', weight: ['400', '700'] });
 
 export const metadata: Metadata = {
-  title: "Golden Marketplace",
-  description: "Modern E-Commerce Portal",
+  title: "Golden Crafters Marketplace",
+  description: "AI-powered B2C marketplace for independent jewelry makers. Discover authentic gold pieces from verified sellers worldwide.",
+  openGraph: {
+    title: "Golden Crafters Marketplace",
+    description: "AI-powered B2C marketplace for independent jewelry makers.",
+    type: "website",
+  },
 };
 
 export default async function LocaleLayout({
@@ -31,11 +37,23 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body className={inter.className}>
+    <html lang={locale} className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var t = localStorage.getItem('theme');
+                if (t && t !== 'auto') document.documentElement.setAttribute('data-theme', t);
+              } catch(e) {}
+            `,
+          }}
+        />
+      </head>
+      <body>
         <NextIntlClientProvider messages={messages}>
           <Header />
-          <main style={{ minHeight: '100vh', padding: '2rem 0' }}>{children}</main>
+          <main>{children}</main>
           <Footer />
         </NextIntlClientProvider>
       </body>
