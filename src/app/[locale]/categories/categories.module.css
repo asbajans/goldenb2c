@@ -2,7 +2,7 @@
 
 /* Header */
 .header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
-.headerInner { /* layout anchor */ }
+
 .pageTitle { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--text-primary); }
 .pageCount { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.25rem; }
 
@@ -25,7 +25,7 @@
 .catSkeleton { color: var(--text-muted); font-size: 0.85rem; }
 
 /* Product Grid */
-.main { /* product grid container */ }
+
 .productGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
 
 /* Skeletons */
