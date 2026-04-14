@@ -26,7 +26,7 @@
 }
 
 /* Gallery */
-.gallery {}
+.gallery { /* image gallery wrapper */ }
 
 .mainImage {
   position: relative;
@@ -74,7 +74,7 @@
 .thumbActive { border-color: var(--gold) !important; box-shadow: var(--gold-glow); }
 
 /* Info */
-.info {}
+.info { /* product info panel */ }
 
 .catPill {
   display: inline-block;
@@ -256,7 +256,7 @@
   gap: 1rem;
   text-align: center;
 }
-.notFoundIcon { font-size: 4rem; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.notFoundIcon { font-size: 4rem; background: var(--gold-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .notFound h1 { font-family: 'Playfair Display', serif; font-size: 2rem; }
 .backBtn { padding: 0.7rem 1.8rem; background: var(--gold-gradient); color: #1a0f00; font-weight: 700; border-radius: 9999px; margin-top: 0.5rem; box-shadow: var(--shadow-gold); }
 
