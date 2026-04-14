@@ -14,7 +14,7 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!slug) return;
-    fetch(`https://api.asb.web.tr/api/marketplace/products/${slug}`)
+    fetch(`/api/products/${slug}`)
       .then(r => r.json())
       .then(d => {
         setProduct(d);

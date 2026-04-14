@@ -7,8 +7,19 @@ export async function GET(request: NextRequest) {
   const page = searchParams.get('page') || '1';
   const limit = searchParams.get('limit') || '24';
   const search = searchParams.get('search') || '';
+  const category = searchParams.get('category') || '';
+  const storeSlug = searchParams.get('storeSlug') || '';
+  const sort = searchParams.get('sort') || '';
+  const minPrice = searchParams.get('minPrice') || '';
+  const maxPrice = searchParams.get('maxPrice') || '';
 
-  const url = `${BACKEND}/marketplace/products?page=${page}&limit=${limit}${search ? `&search=${search}` : ''}`;
+  let url = `${BACKEND}/marketplace/products?page=${page}&limit=${limit}`;
+  if (search) url += `&search=${search}`;
+  if (category) url += `&category=${encodeURIComponent(category)}`;
+  if (storeSlug) url += `&storeSlug=${storeSlug}`;
+  if (sort) url += `&sort=${sort}`;
+  if (minPrice) url += `&minPrice=${minPrice}`;
+  if (maxPrice) url += `&maxPrice=${maxPrice}`;
 
   try {
     const res = await fetch(url, {
