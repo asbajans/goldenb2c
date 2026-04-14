@@ -1,0 +1,77 @@
+.page { max-width: 1320px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+/* Header */
+.header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+.pageTitle { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--text-primary); }
+.pageCount { color: var(--text-muted); font-size: 0.88rem; margin-top: 0.25rem; }
+
+.searchWrap { display: flex; align-items: center; gap: 0.6rem; background: var(--bg-card); border: 1.5px solid var(--border-solid); border-radius: 9999px; padding: 0.55rem 1.1rem; color: var(--text-muted); min-width: 260px; transition: var(--transition); }
+.searchWrap:focus-within { border-color: var(--gold); box-shadow: var(--gold-glow); color: var(--text-primary); }
+.searchInput { background: none; border: none; outline: none; color: var(--text-primary); font-size: 0.9rem; width: 100%; }
+.searchInput::placeholder { color: var(--text-muted); }
+
+/* Store Grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+
+/* Store Card */
+.storeCard {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition);
+}
+.storeCard:hover { transform: translateY(-6px); box-shadow: var(--shadow-gold); border-color: var(--gold); }
+
+/* Banner */
+.banner { position: relative; height: 120px; background: var(--bg-secondary); overflow: hidden; }
+.bannerPlaceholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: linear-gradient(135deg, var(--bg-secondary), var(--gold-pale)); color: var(--gold); opacity: 0.5; }
+
+/* Logo */
+.logoWrap { position: absolute; bottom: -20px; left: 1.25rem; }
+.logo { border-radius: 50%; border: 3px solid var(--bg-card); object-fit: cover; }
+.logoPlaceholder { width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--bg-card); background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; color: #1a0f00; }
+
+/* Card Content */
+.cardContent { padding: 1.75rem 1.25rem 1.25rem; }
+.storeName { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.35rem; }
+.storeDesc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem; }
+.storeMeta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.metaItem { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
+
+.visitBtn { display: inline-block; padding: 0.45rem 1.1rem; background: var(--gold-gradient); color: #1a0f00; font-size: 0.82rem; font-weight: 700; border-radius: 9999px; transition: var(--transition); }
+.storeCard:hover .visitBtn { filter: brightness(1.08); }
+
+/* Skeletons */
+@keyframes shimmer { 0% { background-position: -600px 0; } 100% { background-position: 600px 0; } }
+.skeletonCard { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: var(--bg-card); }
+.skeletonBanner { height: 120px; background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-card) 50%, var(--bg-secondary) 75%); background-size: 800px 100%; animation: shimmer 1.6s infinite linear; }
+.skeletonBody { padding: 1.75rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.skeletonLine { height: 14px; border-radius: 6px; background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-card) 50%, var(--bg-secondary) 75%); background-size: 800px 100%; animation: shimmer 1.6s infinite linear; }
+.skeletonLineShort { height: 12px; width: 55%; border-radius: 6px; background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-card) 50%, var(--bg-secondary) 75%); background-size: 800px 100%; animation: shimmer 1.6s infinite linear; }
+
+/* Empty */
+.empty { text-align: center; padding: 5rem 2rem; }
+.emptyIcon { font-size: 4rem; margin-bottom: 1rem; }
+.empty h3 { font-size: 1.25rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.empty p { color: var(--text-muted); }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 3rem; }
+.pgBtn { padding: 0.55rem 1.25rem; background: var(--bg-card); border: 1.5px solid var(--border-solid); border-radius: 9999px; color: var(--text-secondary); font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: var(--transition); }
+.pgBtn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+.pgBtn:disabled { opacity: 0.4; cursor: default; }
+.pgInfo { font-size: 0.88rem; color: var(--text-muted); }
+
+/* CTA Banner */
+.cta { margin-top: 5rem; padding: 3rem 2rem; background: var(--gold-pale); border: 1px solid var(--border-solid); border-radius: var(--radius-lg); text-align: center; }
+.cta h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem; }
+.cta p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 480px; margin-inline: auto; }
+.ctaBtn { display: inline-block; padding: 0.8rem 2rem; background: var(--gold-gradient); color: #1a0f00; font-weight: 800; font-size: 1rem; border-radius: 9999px; transition: var(--transition); box-shadow: var(--shadow-gold); }
+.ctaBtn:hover { filter: brightness(1.08); transform: translateY(-2px); }
+
+@media (max-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
+@media (max-width: 600px) { .page { padding: 1.5rem 1rem 3rem; } .header { flex-direction: column; align-items: flex-start; } .searchWrap { min-width: 100%; } }
