@@ -4,6 +4,34 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import styles from './product.module.css';
 
+const SITE_URL = 'https://asb.web.tr';
+
+function generateProductSchema(product: any, price: number, priceUSD: number | null) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    description: product.description,
+    image: product.images?.[0] || `${SITE_URL}/images/placeholder.jpg`,
+    sku: product.sku,
+    brand: { '@type': 'Brand', name: product.store?.storeName || 'Golden Crafters' },
+    offers: {
+      '@type': 'Offer',
+      url: `${SITE_URL}/p/${product.slug}`,
+      priceCurrency: 'TRY',
+      price: price,
+      priceValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      availability: product.quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: product.store?.storeName || 'Golden Crafters' }
+    },
+    aggregateRating: product.store?.rating ? {
+      '@type': 'AggregateRating',
+      ratingValue: product.store.rating,
+      reviewCount: product.store.totalProducts || 0
+    } : undefined
+  };
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
@@ -49,8 +77,15 @@ export default function ProductDetailPage() {
     ? Object.keys(variants[0].attributes || {})
     : [];
 
+  const productSchema = generateProductSchema(product, Number(price) || 0, priceUSD ? Number(priceUSD) : null);
+
   return (
-    <div className={styles.page}>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <div className={styles.page}>
       <div className={styles.breadcrumb}>
         <a href="/">Home</a>
         <span>→</span>
@@ -188,5 +223,6 @@ export default function ProductDetailPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

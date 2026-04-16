@@ -48,6 +48,18 @@
 .pagination { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 3rem; }
 .pgBtn { padding: 0.55rem 1.25rem; background: var(--bg-card); border: 1.5px solid var(--border-solid); border-radius: 9999px; color: var(--text-secondary); font-weight: 600; font-size: 0.88rem; cursor: pointer; transition: var(--transition); }
 .pgBtn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+
+/* Filter Section */
+.filterSection { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.filterSection:last-of-type { border-bottom: none; }
+
+.variationGrid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.varBtn { padding: 0.4rem 0.75rem; background: var(--bg-secondary); border: 1.5px solid transparent; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: var(--transition); }
+.varBtn:hover { border-color: var(--gold); color: var(--gold); }
+.varActive { background: var(--gold-pale) !important; border-color: var(--gold) !important; color: var(--gold) !important; font-weight: 600; }
+
+.clearFiltersBtn { width: 100%; padding: 0.5rem; background: transparent; border: 1.5px dashed var(--border); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.8rem; cursor: pointer; transition: var(--transition); margin-top: 0.5rem; }
+.clearFiltersBtn:hover { border-color: var(--gold); color: var(--gold); }
 .pgBtn:disabled { opacity: 0.4; cursor: default; }
 .pgInfo { font-size: 0.88rem; color: var(--text-muted); }
 
