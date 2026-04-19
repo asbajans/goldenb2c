@@ -55,7 +55,7 @@ export default function CartPage() {
               </div>
               
               <div className={styles.itemQty}>
-                <button onClick={() => updateItem(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
+                <button onClick={() => updateItem(item.id, Math.max(1, item.quantity - 1))} disabled={item.quantity <= 1}>−</button>
                 <span>{item.quantity}</span>
                 <button onClick={() => updateItem(item.id, item.quantity + 1)}>+</button>
               </div>

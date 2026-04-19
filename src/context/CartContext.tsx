@@ -77,13 +77,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ productId, variantId, quantity })
       });
       const data = await res.json();
-      setCart({
-        cartId: data.cartId || null,
-        items: data.items || [],
-        count: data.count || 0,
-        total: data.total || 0,
-        status: data.status || 'pending'
-      });
+      if (res.ok) {
+        setCart({
+          cartId: data.cartId || null,
+          items: data.items || [],
+          count: data.count || 0,
+          total: data.total || 0,
+          status: data.status || 'pending'
+        });
+      }
     } catch (error) {
       console.error('Add to cart error:', error);
     } finally {
@@ -93,10 +95,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateItem = async (itemId: string, quantity: number) => {
     try {
-      const res = await fetch(`/api/cart/item/${itemId}`, {
+      const res = await fetch('/api/cart/item', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity })
+        body: JSON.stringify({ itemId, quantity })
       });
       if (res.ok) {
         await refreshCart();
@@ -108,7 +110,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = async (itemId: string) => {
     try {
-      const res = await fetch(`/api/cart/item/${itemId}`, { method: 'DELETE' });
+      const res = await fetch('/api/cart/item', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId })
+      });
       if (res.ok) {
         await refreshCart();
       }
