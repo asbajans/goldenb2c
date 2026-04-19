@@ -48,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const refreshCart = useCallback(async () => {
     try {
-      const res = await fetch('/api/cart');
+      const res = await fetch('https://api.asb.web.tr/api/cart');
       const data = await res.json();
       setCart({
         cartId: data.cartId || null,
@@ -71,10 +71,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = async (productId: string, variantId?: string, quantity = 1) => {
     try {
       setLoading(true);
-      const res = await fetch('/api/cart', {
+      const res = await fetch('https://api.asb.web.tr/api/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', productId, variantId, quantity })
+        body: JSON.stringify({ productId, variantId, quantity })
       });
       const data = await res.json();
       if (res.ok) {
@@ -95,10 +95,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateItem = async (itemId: string, quantity: number) => {
     try {
-      const res = await fetch('/api/cart', {
+      const res = await fetch(`https://api.asb.web.tr/api/cart/item/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId, quantity })
+        body: JSON.stringify({ quantity })
       });
       if (res.ok) {
         await refreshCart();
@@ -110,10 +110,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = async (itemId: string) => {
     try {
-      const res = await fetch('/api/cart', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId })
+      const res = await fetch(`https://api.asb.web.tr/api/cart/item/${itemId}`, {
+        method: 'DELETE'
       });
       if (res.ok) {
         await refreshCart();
@@ -125,10 +123,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = async () => {
     try {
-      await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'clear' })
+      await fetch('https://api.asb.web.tr/api/cart/clear', {
+        method: 'DELETE'
       });
       setCart(defaultCart);
     } catch (error) {
