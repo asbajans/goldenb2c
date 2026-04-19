@@ -5,9 +5,7 @@ const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr/api';
 export async function GET(request: NextRequest) {
   try {
     const res = await fetch(`${BACKEND}/cart`, {
-      headers: {
-        cookie: request.headers.get('cookie') || ''
-      },
+      headers: { cookie: request.headers.get('cookie') || '' },
       credentials: 'include'
     });
     const data = await res.json();
@@ -30,7 +28,7 @@ export async function POST(request: NextRequest) {
       reqBody = { productId: body.productId, variantId: body.variantId, quantity: body.quantity };
     } else if (body.action === 'checkout') {
       endpoint = BACKEND + '/cart/checkout';
-      reqBody = { name: body.name, phone: body.phone, address: body.address, city: body.city, country: body.country, notes: body.notes };
+      reqBody = { name: body.name, phone: body.phone, address: body.address, city: body.city, notes: body.notes };
     } else if (body.action === 'clear') {
       endpoint = BACKEND + '/cart/clear';
       method = 'DELETE';
@@ -77,9 +75,7 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json();
     const res = await fetch(`${BACKEND}/cart/item/${body.itemId}`, {
       method: 'DELETE',
-      headers: {
-        cookie: request.headers.get('cookie') || ''
-      },
+      headers: { cookie: request.headers.get('cookie') || '' },
       credentials: 'include'
     });
     const data = await res.json();

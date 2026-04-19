@@ -30,7 +30,7 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
-      const res = await fetch('https://api.asb.web.tr/api/cart/checkout', {
+      const res = await fetch('/api/cart/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, paymentMethod })
