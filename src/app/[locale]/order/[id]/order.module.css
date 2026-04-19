@@ -1,0 +1,22 @@
+.page { min-height: 60vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+
+.error, .success { text-align: center; max-width: 500px; }
+
+.error h1, .success h1 { font-size: 2rem; color: var(--text-primary); margin-bottom: 1rem; }
+.success h1 { color: var(--gold); }
+
+.icon { font-size: 4rem; margin-bottom: 1rem; }
+.orderId { font-family: monospace; font-size: 1rem; color: var(--gold); background: var(--gold-pale); padding: 0.5rem 1rem; border-radius: var(--radius-sm); margin: 1rem 0; }
+
+.info { margin: 2rem 0; color: var(--text-muted); font-size: 0.95rem; }
+.info p { margin: 0.5rem 0; }
+
+.actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+.primaryBtn { padding: 0.75rem 2rem; background: var(--gold-gradient); color: #1a0f00; font-weight: 700; text-decoration: none; border-radius: 9999px; }
+.primaryBtn:hover { filter: brightness(1.1); }
+
+.secondaryBtn { padding: 0.75rem 2rem; background: transparent; border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; border-radius: 9999px; }
+.secondaryBtn:hover { border-color: var(--gold); color: var(--gold); }
+
+.btn { padding: 0.75rem 2rem; background: var(--gold-gradient); color: #1a0f00; font-weight: 700; text-decoration: none; border-radius: 9999px; }

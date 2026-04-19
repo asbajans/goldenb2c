@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useCart } from '@/context/CartContext';
 import styles from './product.module.css';
 
 const SITE_URL = 'https://asb.web.tr';
@@ -34,11 +35,14 @@ function generateProductSchema(product: any, price: number, priceUSD: number | n
 
 export default function ProductDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug as string;
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [adding, setAdding] = useState(false);
+  const { addItem } = useCart();
 
   useEffect(() => {
     if (!slug) return;
@@ -189,7 +193,24 @@ export default function ProductDetailPage() {
 
           {/* CTA */}
           <div className={styles.actions}>
-            <button className={styles.btnBuy}>🛒 Add to Cart</button>
+            <button 
+              className={styles.btnBuy} 
+              disabled={adding}
+              onClick={async () => {
+                if (!product) return;
+                setAdding(true);
+                try {
+                  await addItem(product.id, selectedVariant?.id || undefined, 1);
+                  router.push('/cart');
+                } catch (e) {
+                  console.error(e);
+                } finally {
+                  setAdding(false);
+                }
+              }}
+            >
+              {adding ? 'Adding...' : '🛒 Add to Cart'}
+            </button>
             <button className={styles.btnWish}>♡ Wishlist</button>
           </div>
 
