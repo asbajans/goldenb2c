@@ -30,10 +30,10 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/cart/checkout', {
+      const res = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, paymentMethod })
+        body: JSON.stringify({ action: 'checkout', ...form, paymentMethod })
       });
       const data = await res.json();
 

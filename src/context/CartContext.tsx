@@ -71,10 +71,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = async (productId: string, variantId?: string, quantity = 1) => {
     try {
       setLoading(true);
-      const res = await fetch('/api/cart/add', {
+      const res = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, variantId, quantity })
+        body: JSON.stringify({ action: 'add', productId, variantId, quantity })
       });
       const data = await res.json();
       if (res.ok) {
@@ -95,7 +95,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateItem = async (itemId: string, quantity: number) => {
     try {
-      const res = await fetch('/api/cart/item', {
+      const res = await fetch('/api/cart', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, quantity })
@@ -110,7 +110,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = async (itemId: string) => {
     try {
-      const res = await fetch('/api/cart/item', {
+      const res = await fetch('/api/cart', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId })
@@ -125,7 +125,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = async () => {
     try {
-      await fetch('/api/cart/clear', { method: 'DELETE' });
+      await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear' })
+      });
       setCart(defaultCart);
     } catch (error) {
       console.error('Clear cart error:', error);
