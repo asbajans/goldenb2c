@@ -1,16 +1,29 @@
 'use client';
+
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
 import styles from './login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleGoogleLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (clientId) {
+      const GoogleAuthInstance = (window as any).google?.accounts?.id;
+      if (GoogleAuthInstance) {
+        GoogleAuthInstance.prompt();
+      } else {
+        setError('Google authentication loading... Try again in a moment.');
+      }
+    } else {
+      setError('Google authentication not configured. Please use email login below.');
+    }
+  };
 
   const handleFastSignup = async (e: FormEvent) => {
     e.preventDefault();
@@ -21,17 +34,27 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    const success = await login(email);
-    if (success) {
-      router.push('/account');
-    } else {
-      setError('Login failed. Please try again.');
-    }
-    setLoading(false);
-  };
+    try {
+      const res = await fetch('/api/auth?action=fast-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
 
-  const handleGoogleLogin = () => {
-    loginWithGoogle();
+      if (data.accessToken) {
+        localStorage.setItem('gc_token', data.accessToken);
+        router.push('/account');
+      } else if (data.error) {
+        setError(data.error.message || 'An error occurred');
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,7 +64,7 @@ export default function LoginPage() {
         <h1 className={styles.title}>Golden Crafters</h1>
         <p className={styles.subtitle}>Sign in to your account</p>
 
-        <button onClick={handleGoogleLogin} className={styles.googleBtn} disabled>
+        <button onClick={handleGoogleLogin} className={styles.googleBtn}>
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.96 20.53 7.7 23 12 23z"/>
@@ -75,6 +98,11 @@ export default function LoginPage() {
           <Link href="/terms" className={styles.link}>Terms</Link>
           {' '}and{' '}
           <Link href="/privacy" className={styles.link}>Privacy</Link>
+        </p>
+
+        <p className={styles.register}>
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className={styles.registerLink}>Create one</Link>
         </p>
       </div>
     </main>
