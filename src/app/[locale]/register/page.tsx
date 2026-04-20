@@ -33,8 +33,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
 
@@ -48,7 +48,8 @@ export default function RegisterPage() {
           email: formData.email,
           password: formData.password,
           firstName: formData.firstName,
-          lastName: formData.lastName
+          lastName: formData.lastName,
+          userType: 'customer'
         })
       });
 
@@ -113,7 +114,7 @@ export default function RegisterPage() {
             className={styles.input}
             autoComplete="new-password"
             required
-            minLength={6}
+            minLength={8}
           />
 
           <input
