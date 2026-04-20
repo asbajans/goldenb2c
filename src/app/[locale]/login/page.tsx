@@ -44,7 +44,7 @@ export default function LoginPage() {
 
       if (data.accessToken) {
         localStorage.setItem('gc_token', data.accessToken);
-        router.push('/account');
+        window.location.href = '/account';
       } else if (data.error) {
         setError(data.error.message || 'Invalid email or password');
       } else {
@@ -57,22 +57,32 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = async () => {
+  const handleFastSignup = async () => {
+    if (!formData.email) {
+      setError('Please enter your email');
+      return;
+    }
     setLoading(true);
     setError('');
+
     try {
       const res = await fetch('/api/auth?action=fast-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email || 'demo@example.com' })
+        body: JSON.stringify({ email: formData.email })
       });
       const data = await res.json();
+
       if (data.accessToken) {
         localStorage.setItem('gc_token', data.accessToken);
-        router.push('/account');
+        window.location.href = '/account';
+      } else if (data.error) {
+        setError(data.error.message || 'An error occurred');
+      } else {
+        setError('Login failed. Please try again.');
       }
     } catch (err) {
-      setError('Demo login failed');
+      setError('Connection error. Please try again.');
     } finally {
       setLoading(false);
     }

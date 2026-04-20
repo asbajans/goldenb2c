@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             firstName: data.firstName || '',
             lastName: data.lastName || '',
             phone: data.phone,
-            userType: data.userType || 'customer'
+            userType: data.userType || data.user?.userType || 'customer'
           });
         } else {
           setUser(null);
