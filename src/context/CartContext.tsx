@@ -46,15 +46,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart>(defaultCart);
   const [loading, setLoading] = useState(true);
 
-  const getAuthHeaders = () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('gc_token') : null;
-    return token ? { Authorization: `Bearer ${token}` } : {};
+  const getAuthHeaders = (): HeadersInit => {
+    if (typeof window === 'undefined') return {};
+    const token = localStorage.getItem('gc_token');
+    if (!token) return {};
+    return { Authorization: `Bearer ${token}` };
   };
 
   const refreshCart = useCallback(async () => {
     try {
       const headers = getAuthHeaders();
-      const res = await fetch('/api/cart', { headers });
+      const res = await fetch('/api/cart', { 
+        headers: Object.keys(headers).length > 0 ? headers : undefined 
+      });
       const data = await res.json();
       setCart({
         cartId: data.cartId || null,
@@ -77,10 +81,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = async (productId: string, variantId?: string, quantity = 1) => {
     try {
       setLoading(true);
-      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
+      const authHeaders = getAuthHeaders();
+      const headers: HeadersInit = { 'Content-Type': 'application/json', ...authHeaders };
       const res = await fetch('/api/cart', {
         method: 'POST',
-        headers,
+        headers: Object.keys(headers).length > 1 ? headers : { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'add', productId, variantId, quantity })
       });
       const data = await res.json();
@@ -102,10 +107,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateItem = async (itemId: string, quantity: number) => {
     try {
-      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
+      const authHeaders = getAuthHeaders();
+      const headers: HeadersInit = { 'Content-Type': 'application/json', ...authHeaders };
       const res = await fetch('/api/cart', {
         method: 'PUT',
-        headers,
+        headers: Object.keys(headers).length > 1 ? headers : { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, quantity })
       });
       if (res.ok) {
@@ -118,10 +124,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = async (itemId: string) => {
     try {
-      const headers = getAuthHeaders();
+      const authHeaders = getAuthHeaders();
       const res = await fetch('/api/cart', {
         method: 'DELETE',
-        headers,
+        headers: Object.keys(authHeaders).length > 0 ? authHeaders : undefined,
         body: JSON.stringify({ itemId })
       });
       if (res.ok) {
@@ -134,10 +140,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = async () => {
     try {
-      const headers = { ...getAuthHeaders() };
+      const authHeaders = getAuthHeaders();
       await fetch('/api/cart', {
         method: 'DELETE',
-        headers,
+        headers: Object.keys(authHeaders).length > 0 ? authHeaders : undefined,
         body: JSON.stringify({ action: 'clear' })
       });
       setCart(defaultCart);
