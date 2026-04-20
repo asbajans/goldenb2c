@@ -3,15 +3,29 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 
 interface CartItem {
-  id: string;
+  id?: string;
   productId: string;
   variantId?: string;
   title: string;
   sku: string;
   quantity: number;
   unitPrice: number;
-  totalPrice: number;
+  totalPrice?: number;
   image?: string;
+  storeName?: string;
+  storeSlug?: string;
+  variantName?: string;
+  attributes?: Record<string, string>;
+}
+
+interface CartContextType {
+  cart: Cart;
+  loading: boolean;
+  addItem: (productData: CartItem) => Promise<void>;
+  updateItem: (itemId: string, quantity: number) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+  clearCart: () => Promise<void>;
+  refreshCart: () => Promise<void>;
 }
 
 interface Cart {
@@ -20,16 +34,6 @@ interface Cart {
   count: number;
   total: number;
   status: string;
-}
-
-interface CartContextType {
-  cart: Cart;
-  loading: boolean;
-  addItem: (productId: string, variantId?: string, quantity?: number) => Promise<void>;
-  updateItem: (itemId: string, quantity: number) => Promise<void>;
-  removeItem: (itemId: string) => Promise<void>;
-  clearCart: () => Promise<void>;
-  refreshCart: () => Promise<void>;
 }
 
 const defaultCart: Cart = {
@@ -82,7 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     refreshCart();
   }, [refreshCart]);
 
-  const addItem = async (productId: string, variantId?: string, quantity = 1) => {
+  const addItem = async (productData: CartItem) => {
     setLoading(true);
     
     try {
@@ -90,27 +94,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
       let items: CartItem[] = stored ? JSON.parse(stored).items || [] : [];
       
       const existingIndex = items.findIndex(
-        item => item.productId === productId && item.variantId === variantId
+        item => item.productId === productData.productId && item.variantId === productData.variantId
       );
 
       if (existingIndex >= 0) {
-        items[existingIndex].quantity += quantity;
+        items[existingIndex].quantity += productData.quantity || 1;
         items[existingIndex].totalPrice = items[existingIndex].unitPrice * items[existingIndex].quantity;
       } else {
         items.push({
           id: generateId(),
-          productId,
-          variantId,
-          title: 'Product ' + productId,
-          sku: 'SKU',
-          quantity,
-          unitPrice: 0,
-          totalPrice: 0
+          productId: productData.productId,
+          variantId: productData.variantId,
+          title: productData.title,
+          sku: productData.sku,
+          quantity: productData.quantity || 1,
+          unitPrice: productData.unitPrice,
+          totalPrice: productData.unitPrice * (productData.quantity || 1),
+          image: productData.image,
+          storeName: productData.storeName,
+          storeSlug: productData.storeSlug,
+          variantName: productData.variantName,
+          attributes: productData.attributes
         });
       }
 
       const count = items.reduce((sum, item) => sum + item.quantity, 0);
-      const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
+      const total = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
       
       saveCart({
         cartId: 'local_' + Date.now(),
@@ -144,7 +153,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
 
       const count = items.reduce((sum, item) => sum + item.quantity, 0);
-      const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
+      const total = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
       
       saveCart({
         cartId: 'local_' + Date.now(),
@@ -167,7 +176,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items = items.filter(item => item.id !== itemId);
 
       const count = items.reduce((sum, item) => sum + item.quantity, 0);
-      const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
+      const total = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
       
       saveCart({
         cartId: 'local_' + Date.now(),

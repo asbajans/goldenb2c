@@ -200,7 +200,20 @@ export default function ProductDetailPage() {
                 if (!product) return;
                 setAdding(true);
                 try {
-                  await addItem(product.id, selectedVariant?.id || undefined, 1);
+                  await addItem({
+                    productId: product.id,
+                    variantId: selectedVariant?.id,
+                    title: product.title,
+                    sku: selectedVariant?.sku || product.sku || '',
+                    quantity: 1,
+                    unitPrice: parseFloat(price) || 0,
+                    totalPrice: parseFloat(price) || 0,
+                    image: images[0] || '',
+                    storeName: product.storeName || product.store?.storeName || '',
+                    storeSlug: product.storeSlug || product.store?.storeSlug || '',
+                    variantName: selectedVariant?.sku,
+                    attributes: selectedVariant?.attributes || {}
+                  });
                   router.push('/cart');
                 } catch (e) {
                   console.error(e);
