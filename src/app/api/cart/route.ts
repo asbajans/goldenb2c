@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr/api';
+const IS_OFFLINE = !BACKEND || BACKEND.includes('localhost');
 
 export async function GET(request: NextRequest) {
+  if (IS_OFFLINE) {
+    return NextResponse.json({ items: [], count: 0, total: 0, cartId: null });
+  }
+  
   try {
     const authHeader = request.headers.get('authorization');
     const cookieHeader = request.headers.get('cookie') || '';
@@ -13,24 +18,23 @@ export async function GET(request: NextRequest) {
     
     const res = await fetch(`${BACKEND}/cart`, {
       headers,
-      credentials: 'include'
+      credentials: 'include',
+      signal: AbortSignal.timeout(8000)
     });
     
-    let data;
-    try {
-      data = await res.json();
-    } catch (e) {
-      data = { items: [], count: 0, total: 0 };
-    }
-    
+    const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
     console.error('[Cart GET] Error:', error.message);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ items: [], count: 0, total: 0, cartId: null }, { status: 200 });
   }
 }
 
 export async function POST(request: NextRequest) {
+  if (IS_OFFLINE) {
+    return NextResponse.json({ error: 'Backend unavailable' }, { status: 503 });
+  }
+  
   try {
     const body = await request.json();
     const authHeader = request.headers.get('authorization');
@@ -53,21 +57,14 @@ export async function POST(request: NextRequest) {
     } else if (body.action === 'clear') {
       endpoint = BACKEND + '/cart/clear';
       method = 'DELETE';
-      reqBody = null;
-    } else {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     
-    if (cookieHeader) {
-      headers['cookie'] = cookieHeader;
-    }
-    if (authHeader) {
-      headers['Authorization'] = authHeader;
-    }
+    if (cookieHeader) headers['cookie'] = cookieHeader;
+    if (authHeader) headers['Authorization'] = authHeader;
     
     const res = await fetch(endpoint, {
       method,
@@ -76,20 +73,10 @@ export async function POST(request: NextRequest) {
       credentials: 'include'
     });
     
-    let data;
-    try {
-      data = await res.json();
-    } catch (e) {
-      data = { error: 'Invalid response from backend' };
-    }
-    
-    if (!res.ok) {
-      console.error('[Cart POST] Backend error:', res.status, res.statusText, data);
-    }
-    
+    const data = await res.json();
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
-    console.error('[Cart POST] Error:', error.message, error.stack);
+    console.error('[Cart POST] Error:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

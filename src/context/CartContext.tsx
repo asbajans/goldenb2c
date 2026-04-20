@@ -42,31 +42,35 @@ const defaultCart: Cart = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function generateId() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart>(defaultCart);
   const [loading, setLoading] = useState(true);
 
-  const getAuthHeaders = (): HeadersInit => {
-    if (typeof window === 'undefined') return {};
-    const token = localStorage.getItem('gc_token');
-    if (!token) return {};
-    return { Authorization: `Bearer ${token}` };
+  const saveCart = (newCart: Cart) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('gc_cart', JSON.stringify(newCart));
+    }
+    setCart(newCart);
   };
 
   const refreshCart = useCallback(async () => {
     try {
-      const headers = getAuthHeaders();
-      const res = await fetch('/api/cart', { 
-        headers: Object.keys(headers).length > 0 ? headers : undefined 
-      });
-      const data = await res.json();
-      setCart({
-        cartId: data.cartId || null,
-        items: data.items || [],
-        count: data.count || 0,
-        total: data.total || 0,
-        status: data.status || 'pending'
-      });
+      if (typeof window === 'undefined') {
+        setLoading(false);
+        return;
+      }
+      
+      const stored = localStorage.getItem('gc_cart');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const count = parsed.items?.reduce((sum: number, item: CartItem) => sum + item.quantity, 0) || 0;
+        const total = parsed.items?.reduce((sum: number, item: CartItem) => sum + (item.totalPrice || 0), 0) || 0;
+        setCart({ ...parsed, count, total });
+      }
     } catch (error) {
       console.error('Cart refresh error:', error);
     } finally {
@@ -79,25 +83,42 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [refreshCart]);
 
   const addItem = async (productId: string, variantId?: string, quantity = 1) => {
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      const authHeaders = getAuthHeaders();
-      const headers: HeadersInit = { 'Content-Type': 'application/json', ...authHeaders };
-      const res = await fetch('/api/cart', {
-        method: 'POST',
-        headers: Object.keys(headers).length > 1 ? headers : { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', productId, variantId, quantity })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setCart({
-          cartId: data.cartId || null,
-          items: data.items || [],
-          count: data.count || 0,
-          total: data.total || 0,
-          status: data.status || 'pending'
+      const stored = localStorage.getItem('gc_cart');
+      let items: CartItem[] = stored ? JSON.parse(stored).items || [] : [];
+      
+      const existingIndex = items.findIndex(
+        item => item.productId === productId && item.variantId === variantId
+      );
+
+      if (existingIndex >= 0) {
+        items[existingIndex].quantity += quantity;
+        items[existingIndex].totalPrice = items[existingIndex].unitPrice * items[existingIndex].quantity;
+      } else {
+        items.push({
+          id: generateId(),
+          productId,
+          variantId,
+          title: 'Product ' + productId,
+          sku: 'SKU',
+          quantity,
+          unitPrice: 0,
+          totalPrice: 0
         });
       }
+
+      const count = items.reduce((sum, item) => sum + item.quantity, 0);
+      const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
+      
+      saveCart({
+        cartId: 'local_' + Date.now(),
+        items,
+        count,
+        total,
+        status: 'pending'
+      });
     } catch (error) {
       console.error('Add to cart error:', error);
     } finally {
@@ -107,16 +128,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateItem = async (itemId: string, quantity: number) => {
     try {
-      const authHeaders = getAuthHeaders();
-      const headers: HeadersInit = { 'Content-Type': 'application/json', ...authHeaders };
-      const res = await fetch('/api/cart', {
-        method: 'PUT',
-        headers: Object.keys(headers).length > 1 ? headers : { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId, quantity })
-      });
-      if (res.ok) {
-        await refreshCart();
+      const stored = localStorage.getItem('gc_cart');
+      if (!stored) return;
+      
+      let items: CartItem[] = JSON.parse(stored).items || [];
+      const index = items.findIndex(item => item.id === itemId);
+      
+      if (index >= 0) {
+        if (quantity <= 0) {
+          items.splice(index, 1);
+        } else {
+          items[index].quantity = quantity;
+          items[index].totalPrice = items[index].unitPrice * quantity;
+        }
       }
+
+      const count = items.reduce((sum, item) => sum + item.quantity, 0);
+      const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
+      
+      saveCart({
+        cartId: 'local_' + Date.now(),
+        items,
+        count,
+        total,
+        status: 'pending'
+      });
     } catch (error) {
       console.error('Update item error:', error);
     }
@@ -124,32 +160,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = async (itemId: string) => {
     try {
-      const authHeaders = getAuthHeaders();
-      const res = await fetch('/api/cart', {
-        method: 'DELETE',
-        headers: Object.keys(authHeaders).length > 0 ? authHeaders : undefined,
-        body: JSON.stringify({ itemId })
+      const stored = localStorage.getItem('gc_cart');
+      if (!stored) return;
+      
+      let items: CartItem[] = JSON.parse(stored).items || [];
+      items = items.filter(item => item.id !== itemId);
+
+      const count = items.reduce((sum, item) => sum + item.quantity, 0);
+      const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
+      
+      saveCart({
+        cartId: 'local_' + Date.now(),
+        items,
+        count,
+        total,
+        status: 'pending'
       });
-      if (res.ok) {
-        await refreshCart();
-      }
     } catch (error) {
       console.error('Remove item error:', error);
     }
   };
 
   const clearCart = async () => {
-    try {
-      const authHeaders = getAuthHeaders();
-      await fetch('/api/cart', {
-        method: 'DELETE',
-        headers: Object.keys(authHeaders).length > 0 ? authHeaders : undefined,
-        body: JSON.stringify({ action: 'clear' })
-      });
-      setCart(defaultCart);
-    } catch (error) {
-      console.error('Clear cart error:', error);
-    }
+    saveCart(defaultCart);
   };
 
   return (
