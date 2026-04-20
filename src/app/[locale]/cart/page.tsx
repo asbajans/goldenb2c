@@ -45,9 +45,15 @@ export default function CartPage() {
               </div>
               
               <div className={styles.itemInfo}>
-                <Link href={`/p/${item.sku}`} className={styles.itemTitle}>
+                {item.storeName && (
+                  <p className={styles.storeName}>🏪 {item.storeName}</p>
+                )}
+                <Link href={`/p/${item.productId}`} className={styles.itemTitle}>
                   {item.title}
                 </Link>
+                {item.variantName && (
+                  <p className={styles.variant}>{item.variantName}</p>
+                )}
                 <p className={styles.itemSku}>SKU: {item.sku}</p>
                 <button onClick={() => removeItem(item.id)} className={styles.removeBtn}>
                   Remove

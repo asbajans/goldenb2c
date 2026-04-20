@@ -194,6 +194,12 @@
   transition: var(--transition);
 }
 .btnWish:hover { background: var(--gold-pale); }
+.btnWishActive {
+  background: var(--gold);
+  color: white;
+  border-color: var(--gold);
+}
+.btnWishActive:hover { background: color-mix(in srgb, var(--gold) 85%, black); }
 
 /* Description */
 .descBlock {

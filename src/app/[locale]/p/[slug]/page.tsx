@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import styles from './product.module.css';
 
 const SITE_URL = 'https://asb.web.tr';
@@ -43,6 +44,9 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [adding, setAdding] = useState(false);
   const { addItem } = useCart();
+  const { user } = useAuth();
+  const [inWishlist, setInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -55,6 +59,21 @@ export default function ProductDetailPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    if (!user || !product?.id) return;
+    async function checkWishlist() {
+      try {
+        const token = localStorage.getItem('gc_token');
+        const res = await fetch('/api/wishlist', { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.wishlist?.some((item: any) => item.productId === product.id)) {
+          setInWishlist(true);
+        }
+      } catch (e) { console.error(e); }
+    }
+    checkWishlist();
+  }, [user, product?.id]);
 
   if (loading) return (
     <div className={styles.loading}>
@@ -82,6 +101,36 @@ export default function ProductDetailPage() {
     : [];
 
   const productSchema = generateProductSchema(product, Number(price) || 0, priceUSD ? Number(priceUSD) : null);
+
+  async function toggleWishlist() {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    setWishlistLoading(true);
+    try {
+      const token = localStorage.getItem('gc_token');
+      if (inWishlist) {
+        await fetch('/api/wishlist', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ productId: product.id })
+        });
+        setInWishlist(false);
+      } else {
+        await fetch('/api/wishlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ productId: product.id })
+        });
+        setInWishlist(true);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setWishlistLoading(false);
+    }
+  }
 
   return (
     <>
@@ -224,7 +273,13 @@ export default function ProductDetailPage() {
             >
               {adding ? 'Adding...' : '🛒 Add to Cart'}
             </button>
-            <button className={styles.btnWish}>♡ Wishlist</button>
+            <button 
+              className={`${styles.btnWish} ${inWishlist ? styles.btnWishActive : ''}`}
+              onClick={toggleWishlist}
+              disabled={wishlistLoading}
+            >
+              {wishlistLoading ? '...' : inWishlist ? '♥ Wishlisted' : '♡ Wishlist'}
+            </button>
           </div>
 
           {/* Details */}

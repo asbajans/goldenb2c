@@ -52,6 +52,13 @@ export async function POST(request: NextRequest) {
         quantity: body.quantity || 1 
       };
     } else if (body.action === 'checkout') {
+      if (IS_OFFLINE) {
+        return NextResponse.json({ 
+          success: true, 
+          orderId: 'ORD-' + Date.now(),
+          message: 'Order placed successfully (demo mode)'
+        });
+      }
       endpoint = BACKEND + '/cart/checkout';
       reqBody = { name: body.name, phone: body.phone, address: body.address, city: body.city, notes: body.notes };
     } else if (body.action === 'clear') {
