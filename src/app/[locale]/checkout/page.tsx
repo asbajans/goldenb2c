@@ -30,10 +30,20 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
+      const token = localStorage.getItem('gc_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const cartItems = cart.items.map((item: any) => ({
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity
+      }));
+
       const res = await fetch('/api/cart/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, paymentMethod })
+        headers,
+        body: JSON.stringify({ ...form, paymentMethod, cartItems })
       });
       const data = await res.json();
 
