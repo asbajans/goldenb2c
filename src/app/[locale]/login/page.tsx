@@ -2,10 +2,12 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import styles from './login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,29 +21,17 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
 
-    try {
-      const res = await fetch('/api/auth/fast-signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-
-      if (data.accessToken) {
-        localStorage.setItem('gc_token', data.accessToken);
-        router.push('/');
-      } else if (data.error) {
-        setError(data.error.message || 'An error occurred');
-      }
-    } catch (err) {
-      setError('Connection error. Please try again.');
-    } finally {
-      setLoading(false);
+    const success = await login(email);
+    if (success) {
+      router.push('/account');
+    } else {
+      setError('Login failed. Please try again.');
     }
+    setLoading(false);
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = '/api/auth/google';
+    loginWithGoogle();
   };
 
   return (

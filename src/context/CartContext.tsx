@@ -46,9 +46,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart>(defaultCart);
   const [loading, setLoading] = useState(true);
 
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('gc_token') : null;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const refreshCart = useCallback(async () => {
     try {
-      const res = await fetch('/api/cart');
+      const headers = getAuthHeaders();
+      const res = await fetch('/api/cart', { headers });
       const data = await res.json();
       setCart({
         cartId: data.cartId || null,
@@ -71,10 +77,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = async (productId: string, variantId?: string, quantity = 1) => {
     try {
       setLoading(true);
-      const res = await fetch('/api/cart/add', {
+      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
+      const res = await fetch('/api/cart', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, variantId, quantity })
+        headers,
+        body: JSON.stringify({ action: 'add', productId, variantId, quantity })
       });
       const data = await res.json();
       if (res.ok) {
@@ -95,10 +102,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const updateItem = async (itemId: string, quantity: number) => {
     try {
-      const res = await fetch(`/api/cart/item/${itemId}`, {
+      const headers = { 'Content-Type': 'application/json', ...getAuthHeaders() };
+      const res = await fetch('/api/cart', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity })
+        headers,
+        body: JSON.stringify({ itemId, quantity })
       });
       if (res.ok) {
         await refreshCart();
@@ -110,8 +118,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItem = async (itemId: string) => {
     try {
-      const res = await fetch(`/api/cart/item/${itemId}`, {
-        method: 'DELETE'
+      const headers = getAuthHeaders();
+      const res = await fetch('/api/cart', {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ itemId })
       });
       if (res.ok) {
         await refreshCart();
@@ -123,8 +134,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = async () => {
     try {
-      await fetch('/api/cart/clear', {
-        method: 'DELETE'
+      const headers = { ...getAuthHeaders() };
+      await fetch('/api/cart', {
+        method: 'DELETE',
+        headers,
+        body: JSON.stringify({ action: 'clear' })
       });
       setCart(defaultCart);
     } catch (error) {

@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 import styles from './Header.module.css';
 
 type Theme = 'light' | 'dark' | 'auto';
@@ -38,7 +40,32 @@ const MenuIcon = () => (
   </svg>
 );
 
+const UserIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const LogoutIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    <polyline points="16,17 21,12 16,7"/>
+    <line x1="21" y1="12" x2="9" y2="12"/>
+  </svg>
+);
+
+const ChevronIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <polyline points="6,9 12,15 18,9"/>
+  </svg>
+);
+
 export default function Header() {
+  const { user, loading, logout } = useAuth();
+  const { cart } = useCart();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<Theme>('auto');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -72,6 +99,17 @@ export default function Header() {
 
   // Close mobile menu on navigation
   useEffect(() => { setMobileOpen(false); }, [pathname]);
+
+  // Close user menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const cycleTheme = () => {
     setTheme(t => t === 'auto' ? 'light' : t === 'light' ? 'dark' : 'auto');
@@ -137,10 +175,62 @@ export default function Header() {
             </button>
 
             {/* Cart */}
-            <button id="btn-cart" className={styles.iconBtn} aria-label="Cart">
+            <Link href="/cart" id="btn-cart" className={styles.iconBtn} aria-label="Cart">
               <CartIcon />
-              <span className={styles.cartCount}>0</span>
-            </button>
+              {cart.count > 0 && <span className={styles.cartCount}>{cart.count > 99 ? '99+' : cart.count}</span>}
+            </Link>
+
+            {/* User / Login */}
+            {loading ? (
+              <div className={styles.iconBtn} style={{ width: 38, height: 38 }}>
+                <div className={styles.spinner} style={{ width: 18, height: 18 }} />
+              </div>
+            ) : user ? (
+              <div className={styles.userMenu} ref={userMenuRef}>
+                <button 
+                  className={styles.userBtn}
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  aria-label="User menu"
+                >
+                  <div className={styles.avatar}>
+                    {user.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <ChevronIcon />
+                </button>
+                {userMenuOpen && (
+                  <div className={styles.dropdown}>
+                    <div className={styles.dropdownHeader}>
+                      <span className={styles.userName}>{user.firstName} {user.lastName}</span>
+                      <span className={styles.userEmail}>{user.email}</span>
+                    </div>
+                    <div className={styles.dropdownDivider} />
+                    <Link href="/account" className={styles.dropdownItem} onClick={() => setUserMenuOpen(false)}>
+                      My Account
+                    </Link>
+                    <Link href="/account/orders" className={styles.dropdownItem} onClick={() => setUserMenuOpen(false)}>
+                      My Orders
+                    </Link>
+                    <Link href="/account/addresses" className={styles.dropdownItem} onClick={() => setUserMenuOpen(false)}>
+                      Addresses
+                    </Link>
+                    <Link href="/account/wishlist" className={styles.dropdownItem} onClick={() => setUserMenuOpen(false)}>
+                      Wishlist
+                    </Link>
+                    <Link href="/account/settings" className={styles.dropdownItem} onClick={() => setUserMenuOpen(false)}>
+                      Settings
+                    </Link>
+                    <div className={styles.dropdownDivider} />
+                    <button className={styles.dropdownItem + ' ' + styles.logoutBtn} onClick={logout}>
+                      <LogoutIcon /> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login" id="btn-login" className={styles.loginBtn}>
+                Sign In
+              </Link>
+            )}
 
             {/* Seller CTA */}
             <Link href="/sellers/join" id="btn-join-seller" className={styles.ctaBtn}>

@@ -4,8 +4,12 @@ const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr/api';
 
 export async function GET(request: NextRequest) {
   try {
+    const authHeader = request.headers.get('authorization');
     const res = await fetch(`${BACKEND}/cart`, {
-      headers: { cookie: request.headers.get('cookie') || '' },
+      headers: { 
+        cookie: request.headers.get('cookie') || '',
+        ...(authHeader ? { Authorization: authHeader } : {})
+      },
       credentials: 'include'
     });
     const data = await res.json();
@@ -18,6 +22,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const authHeader = request.headers.get('authorization');
     
     let endpoint = BACKEND + '/cart';
     let method = 'POST';
@@ -39,7 +44,8 @@ export async function POST(request: NextRequest) {
       method,
       headers: {
         'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || ''
+        cookie: request.headers.get('cookie') || '',
+        ...(authHeader ? { Authorization: authHeader } : {})
       },
       body: method === 'POST' ? JSON.stringify(reqBody) : undefined,
       credentials: 'include'
@@ -54,11 +60,13 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
+    const authHeader = request.headers.get('authorization');
     const res = await fetch(`${BACKEND}/cart/item/${body.itemId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || ''
+        cookie: request.headers.get('cookie') || '',
+        ...(authHeader ? { Authorization: authHeader } : {})
       },
       body: JSON.stringify({ quantity: body.quantity }),
       credentials: 'include'
@@ -73,9 +81,13 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json();
+    const authHeader = request.headers.get('authorization');
     const res = await fetch(`${BACKEND}/cart/item/${body.itemId}`, {
       method: 'DELETE',
-      headers: { cookie: request.headers.get('cookie') || '' },
+      headers: { 
+        cookie: request.headers.get('cookie') || '',
+        ...(authHeader ? { Authorization: authHeader } : {})
+      },
       credentials: 'include'
     });
     const data = await res.json();
