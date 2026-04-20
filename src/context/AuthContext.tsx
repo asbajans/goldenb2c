@@ -38,16 +38,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await fetch('/api/auth?action=me', {
-        method: 'POST',
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
 
       if (res.ok) {
         const data = await res.json();
-        if (data.id) {
+        if (data.user) {
+          setUser({
+            id: data.user.id,
+            email: data.user.email,
+            firstName: data.user.firstName || '',
+            lastName: data.user.lastName || '',
+            phone: data.user.phone,
+            userType: data.user.userType || 'customer'
+          });
+        } else if (data.id) {
           setUser({
             id: data.id,
             email: data.email,
