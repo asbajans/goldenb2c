@@ -23,36 +23,49 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const authHeader = request.headers.get('authorization');
+    const cookieHeader = request.headers.get('cookie') || '';
     
     let endpoint = BACKEND + '/cart';
     let method = 'POST';
-    let reqBody = body;
+    let reqBody: any = null;
     
     if (body.action === 'add') {
       endpoint = BACKEND + '/cart/add';
-      reqBody = { productId: body.productId, variantId: body.variantId, quantity: body.quantity };
+      reqBody = { 
+        productId: body.productId, 
+        variantId: body.variantId || undefined, 
+        quantity: body.quantity || 1 
+      };
     } else if (body.action === 'checkout') {
       endpoint = BACKEND + '/cart/checkout';
       reqBody = { name: body.name, phone: body.phone, address: body.address, city: body.city, notes: body.notes };
     } else if (body.action === 'clear') {
       endpoint = BACKEND + '/cart/clear';
       method = 'DELETE';
-      reqBody = undefined;
+      reqBody = null;
+    } else {
+      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
     
     const res = await fetch(endpoint, {
       method,
       headers: {
         'Content-Type': 'application/json',
-        cookie: request.headers.get('cookie') || '',
+        cookie: cookieHeader,
         ...(authHeader ? { Authorization: authHeader } : {})
       },
-      body: method === 'POST' ? JSON.stringify(reqBody) : undefined,
+      body: method === 'POST' && reqBody ? JSON.stringify(reqBody) : undefined,
       credentials: 'include'
     });
     const data = await res.json();
+    
+    if (!res.ok) {
+      console.error('[Cart POST] Backend error:', res.status, data);
+    }
+    
     return NextResponse.json(data, { status: res.status });
   } catch (error: any) {
+    console.error('[Cart POST] Error:', error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
