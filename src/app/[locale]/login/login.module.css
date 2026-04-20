@@ -38,6 +38,10 @@
 .registerLink { color: #d4af37; text-decoration: none; font-weight: 600; }
 .registerLink:hover { text-decoration: underline; }
 
+.forgotLink { margin-top: 0.75rem; font-size: 0.85rem; }
+.forgotLink a { color: #888; text-decoration: none; }
+.forgotLink a:hover { color: #d4af37; text-decoration: underline; }
+
 @media (max-width: 480px) {
   .card { padding: 1.5rem; }
   .title { font-size: 1.5rem; }

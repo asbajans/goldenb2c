@@ -7,7 +7,7 @@ import styles from './login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -25,20 +25,20 @@ export default function LoginPage() {
     }
   };
 
-  const handleFastSignup = async (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      setError('Please enter your email');
+    if (!formData.email || !formData.password) {
+      setError('Please enter email and password');
       return;
     }
     setLoading(true);
     setError('');
 
     try {
-      const res = await fetch('/api/auth?action=fast-signup', {
+      const res = await fetch('/api/auth?action=login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify(formData)
       });
       const data = await res.json();
 
@@ -46,12 +46,33 @@ export default function LoginPage() {
         localStorage.setItem('gc_token', data.accessToken);
         router.push('/account');
       } else if (data.error) {
-        setError(data.error.message || 'An error occurred');
+        setError(data.error.message || 'Invalid email or password');
       } else {
         setError('Login failed. Please try again.');
       }
     } catch (err) {
       setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/auth?action=fast-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email || 'demo@example.com' })
+      });
+      const data = await res.json();
+      if (data.accessToken) {
+        localStorage.setItem('gc_token', data.accessToken);
+        router.push('/account');
+      }
+    } catch (err) {
+      setError('Demo login failed');
     } finally {
       setLoading(false);
     }
@@ -78,20 +99,32 @@ export default function LoginPage() {
           <span>or</span>
         </div>
 
-        <form onSubmit={handleFastSignup} className={styles.form}>
+        <form onSubmit={handleLogin} className={styles.form}>
           <input
             type="email"
-            placeholder="email@example.com"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            placeholder="Email"
+            value={formData.email}
+            onChange={e => setFormData({ ...formData, email: e.target.value })}
             className={styles.input}
             autoComplete="email"
           />
+          <input
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={e => setFormData({ ...formData, password: e.target.value })}
+            className={styles.input}
+            autoComplete="current-password"
+          />
           {error && <p className={styles.error}>{error}</p>}
           <button type="submit" className={styles.submitBtn} disabled={loading}>
-            {loading ? 'Signing in...' : 'Continue'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <div className={styles.forgotLink}>
+          <Link href="/forgot-password">Forgot password?</Link>
+        </div>
 
         <p className={styles.terms}>
           By continuing, you agree to our{' '}
