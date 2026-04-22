@@ -1,14 +1,22 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import styles from './checkout.module.css';
 
+interface BankInfo {
+  bank_name?: string;
+  bank_iban?: string;
+  bank_account_name?: string;
+  bank_swift?: string;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, clearCart, refreshCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const [bankInfo, setBankInfo] = useState<BankInfo>({});
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -19,6 +27,18 @@ export default function CheckoutPage() {
     notes: ''
   });
   const [paymentMethod, setPaymentMethod] = useState('stripe');
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => setBankInfo({
+        bank_name: d.bank_name,
+        bank_iban: d.bank_iban,
+        bank_account_name: d.bank_account_name,
+        bank_swift: d.bank_swift
+      }))
+      .catch(console.error);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -107,42 +127,33 @@ export default function CheckoutPage() {
                   <option value="USA">USA</option>
                   <option value="UK">UK</option>
                 </select>
-              </div>
+</div>
             </div>
-            <div className={styles.field}>
-              <label>Notes</label>
-              <textarea name="notes" value={form.notes} onChange={handleChange} placeholder="Special instructions..." rows={3} />
-            </div>
-          </section>
 
-          <section className={styles.section}>
-            <h2>Payment Method</h2>
-            <div className={styles.paymentOptions}>
-              <label className={`${styles.paymentOption} ${paymentMethod === 'stripe' ? styles.paymentActive : ''}`}>
-                <input type="radio" name="payment" value="stripe" checked={paymentMethod === 'stripe'} onChange={() => setPaymentMethod('stripe')} />
-                <span className={styles.paymentIcon}>💳</span>
-                <div>
-                  <strong>Credit Card</strong>
-                  <p>Pay securely with Stripe</p>
+            {paymentMethod === 'bankTransfer' && (bankInfo.bank_name || bankInfo.bank_iban) && (
+              <div className={styles.bankDetails}>
+                <h3>Bank Transfer Details</h3>
+                <div className={styles.bankRow}>
+                  <span>Bank:</span>
+                  <strong>{bankInfo.bank_name}</strong>
                 </div>
-              </label>
-              <label className={`${styles.paymentOption} ${paymentMethod === 'bankTransfer' ? styles.paymentActive : ''}`}>
-                <input type="radio" name="payment" value="bankTransfer" checked={paymentMethod === 'bankTransfer'} onChange={() => setPaymentMethod('bankTransfer')} />
-                <span className={styles.paymentIcon}>🏦</span>
-                <div>
-                  <strong>Bank Transfer</strong>
-                  <p>Wire transfer to our account</p>
+                <div className={styles.bankRow}>
+                  <span>Account Name:</span>
+                  <strong>{bankInfo.bank_account_name}</strong>
                 </div>
-              </label>
-              <label className={`${styles.paymentOption} ${paymentMethod === 'crypto' ? styles.paymentActive : ''}`}>
-                <input type="radio" name="payment" value="crypto" checked={paymentMethod === 'crypto'} onChange={() => setPaymentMethod('crypto')} />
-                <span className={styles.paymentIcon}>₿</span>
-                <div>
-                  <strong>USDT</strong>
-                  <p>Pay with USDT TRC20</p>
+                <div className={styles.bankRow}>
+                  <span>IBAN:</span>
+                  <strong className={styles.iban}>{bankInfo.bank_iban}</strong>
                 </div>
-              </label>
-            </div>
+                {bankInfo.bank_swift && (
+                  <div className={styles.bankRow}>
+                    <span>SWIFT:</span>
+                    <strong>{bankInfo.bank_swift}</strong>
+                  </div>
+                )}
+                <p className={styles.bankNote}>Please transfer the total amount to the account above and upload your receipt.</p>
+              </div>
+            )}
           </section>
         </div>
 
