@@ -9,6 +9,7 @@ import styles from './addresses.module.css';
 interface Address {
   id: string;
   name: string;
+  fullName: string;
   address: string;
   city: string;
   phone: string;
@@ -61,15 +62,26 @@ export default function AddressesPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          name: formData.name,
+          fullName: formData.name,
+          address: formData.address,
+          city: formData.city,
+          phone: formData.phone,
+          country: 'Turkey'
+        })
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         fetchAddresses();
         setShowForm(false);
         setFormData({ name: '', address: '', city: '', phone: '' });
+      } else {
+        alert(data.error || 'Adres eklenemedi');
       }
     } catch (err) {
       console.error('Add address error:', err);
+      alert('Bağlantı hatası');
     }
   }
 
