@@ -12,11 +12,23 @@ interface BankInfo {
   bank_swift?: string;
 }
 
+interface Address {
+  id: string;
+  name: string;
+  fullName: string;
+  address: string;
+  city: string;
+  phone: string;
+  isDefault: boolean;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, clearCart, refreshCart } = useCart();
+  const { cart, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [bankInfo, setBankInfo] = useState<BankInfo>({});
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -26,7 +38,7 @@ export default function CheckoutPage() {
     country: 'Turkey',
     notes: ''
   });
-  const [paymentMethod, setPaymentMethod] = useState('stripe');
+  const [paymentMethod, setPaymentMethod] = useState('bankTransfer');
 
   useEffect(() => {
     fetch('/api/settings')
@@ -38,7 +50,34 @@ export default function CheckoutPage() {
         bank_swift: d.bank_swift
       }))
       .catch(console.error);
+      
+    // Fetch user addresses
+    const token = localStorage.getItem('gc_token');
+    if (token) {
+      fetch('/api/addresses', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => {
+          if (data.addresses) {
+            setAddresses(data.addresses);
+            const defaultAddr = data.addresses.find((a: Address) => a.isDefault) || data.addresses[0];
+            if (defaultAddr) {
+              handleAddressSelect(defaultAddr);
+            }
+          }
+        })
+        .catch(console.error);
+    }
   }, []);
+
+  const handleAddressSelect = (addr: Address) => {
+    setForm(prev => ({
+      ...prev,
+      name: addr.fullName || addr.name || '',
+      address: addr.address || '',
+      city: addr.city || '',
+      phone: addr.phone || ''
+    }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -67,9 +106,9 @@ export default function CheckoutPage() {
       });
       const data = await res.json();
 
-      if (data.success) {
+      if (data.success || data.orderId) {
         await clearCart();
-        router.push(`/order/${data.orderId}?success=1`);
+        router.push(`/order/${data.orderId || data.id}?success=1`);
       } else {
         alert(data.error || 'Checkout failed');
       }
@@ -96,6 +135,35 @@ export default function CheckoutPage() {
 
       <form onSubmit={handleSubmit} className={styles.layout}>
         <div className={styles.form}>
+          
+          {/* Saved Addresses Section */}
+          {addresses.length > 0 && (
+            <section className={styles.section}>
+              <h2>Saved Addresses</h2>
+              <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr', marginBottom: '1.5rem' }}>
+                {addresses.map(addr => (
+                  <div 
+                    key={addr.id} 
+                    onClick={() => handleAddressSelect(addr)}
+                    style={{ 
+                      padding: '1rem', 
+                      border: '1px solid #ddd', 
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      background: form.address === addr.address ? '#f6ffed' : '#fff',
+                      borderColor: form.address === addr.address ? '#b7eb8f' : '#ddd'
+                    }}
+                  >
+                    <strong style={{ display: 'block', marginBottom: '0.25rem' }}>{addr.name}</strong>
+                    <div style={{ fontSize: '0.85rem', color: '#666' }}>{addr.fullName}</div>
+                    <div style={{ fontSize: '0.85rem', color: '#666' }}>{addr.address}</div>
+                    <div style={{ fontSize: '0.85rem', color: '#666' }}>{addr.city} - {addr.phone}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           <section className={styles.section}>
             <h2>Shipping Address</h2>
             <div className={styles.field}>
@@ -127,31 +195,63 @@ export default function CheckoutPage() {
                   <option value="USA">USA</option>
                   <option value="UK">UK</option>
                 </select>
-</div>
+              </div>
+            </div>
+            <div className={styles.field}>
+               <label>Order Notes</label>
+               <textarea name="notes" value={form.notes} onChange={handleChange} placeholder="Optional notes for your order" rows={3}></textarea>
+            </div>
+          </section>
+
+          <section className={styles.section}>
+            <h2>Payment Method</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input 
+                  type="radio" 
+                  name="paymentMethod" 
+                  value="stripe" 
+                  checked={paymentMethod === 'stripe'} 
+                  onChange={(e) => setPaymentMethod(e.target.value)} 
+                />
+                <span>Credit Card (Stripe)</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input 
+                  type="radio" 
+                  name="paymentMethod" 
+                  value="bankTransfer" 
+                  checked={paymentMethod === 'bankTransfer'} 
+                  onChange={(e) => setPaymentMethod(e.target.value)} 
+                />
+                <span>Bank Transfer / EFT</span>
+              </label>
             </div>
 
             {paymentMethod === 'bankTransfer' && (bankInfo.bank_name || bankInfo.bank_iban) && (
-              <div className={styles.bankDetails}>
-                <h3>Bank Transfer Details</h3>
-                <div className={styles.bankRow}>
-                  <span>Bank:</span>
+              <div className={styles.bankDetails} style={{ marginTop: '1.5rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px', border: '1px solid #eaeaea' }}>
+                <h3 style={{ marginTop: 0, fontSize: '1rem', marginBottom: '1rem' }}>Bank Transfer Details</h3>
+                <div className={styles.bankRow} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ color: '#666' }}>Bank:</span>
                   <strong>{bankInfo.bank_name}</strong>
                 </div>
-                <div className={styles.bankRow}>
-                  <span>Account Name:</span>
+                <div className={styles.bankRow} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ color: '#666' }}>Account Name:</span>
                   <strong>{bankInfo.bank_account_name}</strong>
                 </div>
-                <div className={styles.bankRow}>
-                  <span>IBAN:</span>
+                <div className={styles.bankRow} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ color: '#666' }}>IBAN:</span>
                   <strong className={styles.iban}>{bankInfo.bank_iban}</strong>
                 </div>
                 {bankInfo.bank_swift && (
-                  <div className={styles.bankRow}>
-                    <span>SWIFT:</span>
+                  <div className={styles.bankRow} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span style={{ color: '#666' }}>SWIFT:</span>
                     <strong>{bankInfo.bank_swift}</strong>
                   </div>
                 )}
-                <p className={styles.bankNote}>Please transfer the total amount to the account above and upload your receipt.</p>
+                <p className={styles.bankNote} style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#666' }}>
+                  Please transfer the total amount to the account above and upload your receipt or specify your order number in the transfer description.
+                </p>
               </div>
             )}
           </section>
@@ -161,21 +261,28 @@ export default function CheckoutPage() {
           <h2>Order Summary</h2>
           <div className={styles.items}>
             {cart.items.map((item: any) => (
-              <div key={item.id} className={styles.itemRow}>
+              <div key={item.id} className={styles.itemRow} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span>{item.quantity}x {item.title}</span>
                 <span>₺{Number(item.totalPrice).toLocaleString('tr-TR')}</span>
               </div>
             ))}
           </div>
-          <div className={styles.divider} />
-          <div className={styles.totalRow}>
+          <div className={styles.divider} style={{ margin: '1rem 0', borderBottom: '1px solid #eaeaea' }} />
+          <div className={styles.totalRow} style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
             <span>Total</span>
             <span>₺{Number(cart.total).toLocaleString('tr-TR')}</span>
           </div>
-          <button type="submit" className={styles.submitBtn} disabled={loading}>
+          <button 
+            type="submit" 
+            className={styles.submitBtn} 
+            disabled={loading}
+            style={{ width: '100%', padding: '1rem', background: '#d4a017', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1.1rem', cursor: 'pointer', fontWeight: 'bold' }}
+          >
             {loading ? 'Processing...' : 'Place Order'}
           </button>
-          <div className={styles.secure}>🔒 Secure checkout</div>
+          <div className={styles.secure} style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: '#666' }}>
+            🔒 Secure checkout
+          </div>
         </div>
       </form>
     </div>

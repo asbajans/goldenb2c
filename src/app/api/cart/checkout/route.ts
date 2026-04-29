@@ -49,7 +49,8 @@ export async function POST(request: NextRequest) {
         address: body.address,
         city: body.city,
         country: body.country,
-        notes: body.notes
+        notes: body.notes,
+        paymentMethod: body.paymentMethod
       }),
       credentials: 'include'
     });
