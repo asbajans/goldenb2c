@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
 import styles from './categories.module.css';
 
@@ -29,6 +30,10 @@ function getIcon(name: string) {
 }
 
 export default function CategoriesPage() {
+  const t = useTranslations('Categories');
+  const tp = useTranslations('Products');
+  const tc = useTranslations('Common');
+  
   const searchParams = useSearchParams();
   const typeParam = searchParams.get('type') || '';
 

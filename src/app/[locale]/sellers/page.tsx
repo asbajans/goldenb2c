@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import styles from './sellers.module.css';
 
-function StoreCard({ store }: { store: any }) {
+function StoreCard({ store, t }: { store: any; t: any }) {
   return (
     <a href={`/sellers/${store.storeSlug}`} className={styles.storeCard} id={`store-${store.storeSlug}`}>
       {/* Banner */}
@@ -29,16 +30,19 @@ function StoreCard({ store }: { store: any }) {
         <h3 className={styles.storeName}>{store.storeName}</h3>
         {store.description && <p className={styles.storeDesc}>{store.description.slice(0, 80)}{store.description.length > 80 ? '...' : ''}</p>}
         <div className={styles.storeMeta}>
-          <span className={styles.metaItem}>📦 {store.totalProducts || 0} products</span>
+          <span className={styles.metaItem}>📦 {store.totalProducts || 0} {t('products')}</span>
           {store.rating > 0 && <span className={styles.metaItem}>⭐ {Number(store.rating).toFixed(1)}</span>}
         </div>
-        <div className={styles.visitBtn}>Visit Store →</div>
+        <div className={styles.visitBtn}>{t('viewStore')} →</div>
       </div>
     </a>
   );
 }
 
 export default function SellersPage() {
+  const t = useTranslations('Sellers');
+  const tc = useTranslations('Common');
+  
   const [stores, setStores] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);

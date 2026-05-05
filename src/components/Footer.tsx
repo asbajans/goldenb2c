@@ -1,29 +1,36 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import styles from './Footer.module.css';
 
 const LINKS = {
   Shop: [
-    { label: 'All Products', href: '/products' },
-    { label: 'Rings', href: '/categories?type=rings' },
-    { label: 'Necklaces', href: '/categories?type=necklaces' },
-    { label: 'Bracelets', href: '/categories?type=bracelets' },
-    { label: 'Earrings', href: '/categories?type=earrings' },
+    { key: 'allProducts', href: '/products' },
+    { key: 'rings', href: '/categories?type=rings' },
+    { key: 'necklaces', href: '/categories?type=necklaces' },
+    { key: 'bracelets', href: '/categories?type=bracelets' },
+    { key: 'earrings', href: '/categories?type=earrings' },
   ],
   Sellers: [
-    { label: 'Become a Seller', href: '/sellers/join' },
-    { label: 'Browse Stores', href: '/sellers' },
-    { label: 'Seller Login', href: 'https://seller.asb.web.tr', external: true },
-    { label: 'Admin Panel', href: 'https://admin.asb.web.tr', external: true },
+    { key: 'becomeSeller', href: '/sellers/join' },
+    { key: 'browseStores', href: '/sellers' },
+    { key: 'sellerLogin', href: 'https://seller.asb.web.tr', external: true },
+    { key: 'adminPanel', href: 'https://admin.asb.web.tr', external: true },
   ],
   Company: [
-    { label: 'About', href: '/about' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Privacy Policy', href: '/privacy-policy' },
-    { label: 'Terms of Service', href: '/terms-of-service' },
+    { key: 'about', href: '/about' },
+    { key: 'blog', href: '/blog' },
+    { key: 'privacyPolicy', href: '/privacy-policy' },
+    { key: 'termsOfService', href: '/terms-of-service' },
   ],
 };
 
 export default function Footer() {
+  const t = useTranslations('Footer');
+  const tCat = useTranslations('Categories');
+  const tc = useTranslations('Common');
+
   return (
     <footer className={styles.footer}>
       {/* Main */}
@@ -33,7 +40,7 @@ export default function Footer() {
           <div className={styles.brand}>
             <div className={styles.logo}>✦ Golden Crafters</div>
             <p className={styles.tagline}>
-              AI-powered marketplace for independent jewelers. Authentic gold. Global reach.
+              {t('tagline')}
             </p>
             <div className={styles.socials}>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className={styles.socialBtn} id="footer-instagram">
@@ -51,21 +58,34 @@ export default function Footer() {
           {/* Links */}
           {Object.entries(LINKS).map(([section, items]) => (
             <div key={section} className={styles.linkGroup}>
-              <h4 className={styles.linkTitle}>{section}</h4>
+              <h4 className={styles.linkTitle}>{section === 'Shop' ? tc('shop') : section === 'Sellers' ? tc('sellers') : t(section.toLowerCase())}</h4>
               <ul className={styles.linkList}>
-                {items.map((item: any) => (
-                  <li key={item.label}>
-                    {item.external ? (
-                      <a href={item.href} target="_blank" rel="noopener noreferrer" className={styles.footerLink}>
-                        {item.label} ↗
-                      </a>
-                    ) : (
-                      <Link href={item.href} className={styles.footerLink}>
-                        {item.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
+                {items.map((item: any) => {
+                  const label = item.key === 'allProducts' ? tc('viewAll') : 
+                    item.key === 'becomeSeller' ? tc('becomeSeller') : 
+                    item.key === 'browseStores' ? tc('sellers') : 
+                    item.key === 'sellerLogin' ? 'Seller Login' : 
+                    item.key === 'adminPanel' ? 'Admin Panel' : 
+                    item.key === 'about' ? t('aboutUs') : 
+                    item.key === 'blog' ? tc('blog') : 
+                    item.key === 'privacyPolicy' ? t('privacyPolicy') : 
+                    item.key === 'termsOfService' ? t('termsOfService') :
+                    tCat(item.key);
+                  
+                  return (
+                    <li key={item.key}>
+                      {item.external ? (
+                        <a href={item.href} target="_blank" rel="noopener noreferrer" className={styles.footerLink}>
+                          {label} ↗
+                        </a>
+                      ) : (
+                        <Link href={item.href} className={styles.footerLink}>
+                          {label}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -75,11 +95,11 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className={styles.bottom}>
         <div className={styles.container}>
-          <p className={styles.copy}>© {new Date().getFullYear()} Golden Crafters Marketplace. All rights reserved.</p>
+          <p className={styles.copy}>© {new Date().getFullYear()} Golden Crafters Marketplace. {t('allRightsReserved')}</p>
           <div className={styles.badges}>
-            <span className={styles.badge}>🔒 SSL Secure</span>
-            <span className={styles.badge}>✦ 100% Authentic</span>
-            <span className={styles.badge}>🌍 Global Shipping</span>
+            <span className={styles.badge}>🔒 {t('securePayment')}</span>
+            <span className={styles.badge}>✦ {t('authenticGold')}</span>
+            <span className={styles.badge}>🌍 {t('globalShipping')}</span>
           </div>
         </div>
       </div>

@@ -1,26 +1,32 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 import ProductCard from '@/components/ProductCard';
 import styles from './page.module.css';
 
 const CATEGORIES = [
-  { label: 'Rings', icon: '💍', slug: 'rings' },
-  { label: 'Necklaces', icon: '📿', slug: 'necklaces' },
-  { label: 'Bracelets', icon: '✨', slug: 'bracelets' },
-  { label: 'Earrings', icon: '🌟', slug: 'earrings' },
-  { label: 'Pendants', icon: '🔮', slug: 'pendants' },
-  { label: 'Sets', icon: '👑', slug: 'sets' },
+  { icon: '💍', slug: 'rings' },
+  { icon: '📿', slug: 'necklaces' },
+  { icon: '✨', slug: 'bracelets' },
+  { icon: '🌟', slug: 'earrings' },
+  { icon: '🔮', slug: 'pendants' },
+  { icon: '👑', slug: 'sets' },
 ];
 
 const TRUST_ITEMS = [
-  { icon: '🔒', title: 'Secure Payments', desc: 'SSL encrypted checkout' },
-  { icon: '🌍', title: 'Global Shipping', desc: 'Worldwide delivery' },
-  { icon: '🤖', title: 'AI-Powered', desc: 'Smart content & discovery' },
-  { icon: '✦', title: '100% Authentic', desc: 'Verified gold quality' },
+  { icon: '🔒', key: 'securePayments' },
+  { icon: '🌍', key: 'globalShipping' },
+  { icon: '🤖', key: 'aiPowered' },
+  { icon: '✦', key: 'authenticGold' },
 ];
 
 export default function Home() {
+  const t = useTranslations('Home');
+  const tc = useTranslations('Common');
+  const tCat = useTranslations('Categories');
+  
   const [products, setProducts] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -48,25 +54,25 @@ export default function Home() {
         <div className={styles.heroContent}>
           <span className={styles.heroPill}>✦ &nbsp;Premium Jewelry Marketplace</span>
           <h1 className={styles.heroTitle}>
-            Discover the World&apos;s<br />
-            <span className={styles.heroGold}>Finest Gold Craft</span>
+            {t('heroTitle')}<br />
+            <span className={styles.heroGold}>{t('heroTitleGold')}</span>
           </h1>
           <p className={styles.heroSub}>
-            Independent jewelers. Authentic pieces. AI-powered discovery across 3 languages and global currencies.
+            {t('heroSubtitle')}
           </p>
           <div className={styles.heroActions}>
-            <a href="/products" className={styles.btnPrimary} id="hero-shop-now">Shop Now ✦</a>
-            <a href="/sellers" className={styles.btnSecondary} id="hero-see-sellers">Meet Sellers</a>
+            <Link href="/products" className={styles.btnPrimary} id="hero-shop-now">{t('shopNow')} ✦</Link>
+            <Link href="/sellers" className={styles.btnSecondary} id="hero-see-sellers">{t('meetSellers')}</Link>
           </div>
           <div className={styles.heroStats}>
             <div className={styles.stat}>
               <strong>{total > 0 ? `${total}+` : '—'}</strong>
-              <span>Products</span>
+              <span>{t('products')}</span>
             </div>
             <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>150+</strong><span>Verified Sellers</span></div>
+            <div className={styles.stat}><strong>150+</strong><span>{t('verifiedSellers')}</span></div>
             <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>3</strong><span>Languages</span></div>
+            <div className={styles.stat}><strong>4</strong><span>{t('languages')}</span></div>
           </div>
         </div>
       </section>
@@ -75,15 +81,15 @@ export default function Home() {
       <section className={styles.section}>
         <div className="container">
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Shop by Category</h2>
-            <a href="/categories" className={styles.seeAll}>See all →</a>
+            <h2 className={styles.sectionTitle}>{t('shopByCategory')}</h2>
+            <Link href="/categories" className={styles.seeAll}>{tc('seeAll')} →</Link>
           </div>
           <div className={styles.categoryGrid}>
             {CATEGORIES.map(cat => (
-              <a key={cat.slug} href={`/categories?type=${cat.slug}`} className={styles.catCard} id={`cat-${cat.slug}`}>
+              <Link key={cat.slug} href={`/categories?type=${cat.slug}`} className={styles.catCard} id={`cat-${cat.slug}`}>
                 <div className={styles.catIcon}>{cat.icon}</div>
-                <span className={styles.catLabel}>{cat.label}</span>
-              </a>
+                <span className={styles.catLabel}>{tCat(cat.slug)}</span>
+              </Link>
             ))}
           </div>
         </div>
@@ -94,10 +100,10 @@ export default function Home() {
         <div className="container">
           <div className={styles.sectionHeader}>
             <div>
-              <h2 className={styles.sectionTitle}>Featured Pieces</h2>
-              <p className={styles.sectionSub}>Curated by our AI from verified sellers</p>
+              <h2 className={styles.sectionTitle}>{t('featuredPieces')}</h2>
+              <p className={styles.sectionSub}>{t('curatedByAI')}</p>
             </div>
-            <a href="/products" className={styles.seeAll}>View all →</a>
+            <Link href="/products" className={styles.seeAll}>{tc('viewAll')} →</Link>
           </div>
 
           {loading ? (
@@ -138,8 +144,8 @@ export default function Home() {
           ) : (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>✦</div>
-              <h3>No products yet</h3>
-              <p>New collections are being added. Check back soon.</p>
+              <h3>{t('noProductsYet')}</h3>
+              <p>{t('checkBackSoon')}</p>
             </div>
           )}
         </div>
@@ -150,11 +156,11 @@ export default function Home() {
         <div className="container">
           <div className={styles.trustGrid}>
             {TRUST_ITEMS.map(item => (
-              <div key={item.title} className={styles.trustItem}>
+              <div key={item.key} className={styles.trustItem}>
                 <div className={styles.trustIcon}>{item.icon}</div>
                 <div>
-                  <h4 className={styles.trustTitle}>{item.title}</h4>
-                  <p className={styles.trustDesc}>{item.desc}</p>
+                  <h4 className={styles.trustTitle}>{t(item.key)}</h4>
+                  <p className={styles.trustDesc}>{t(item.key + 'Desc')}</p>
                 </div>
               </div>
             ))}
@@ -167,9 +173,9 @@ export default function Home() {
         <div className="container">
           <div className={styles.ctaBox}>
             <div className={styles.ctaOrb} />
-            <h2 className={styles.ctaTitle}>Sell on Golden Crafters</h2>
-            <p className={styles.ctaSub}>Join hundreds of independent jewelers. AI-powered listings, Etsy &amp; Amazon sync, and instant multi-language storefronts.</p>
-            <a href="/sellers/join" className={styles.ctaBtn} id="cta-become-seller">Start Selling Free ✦</a>
+            <h2 className={styles.ctaTitle}>{t('sellOnGolden')}</h2>
+            <p className={styles.ctaSub}>{t('sellOnGoldenSub')}</p>
+            <Link href="/sellers/join" className={styles.ctaBtn} id="cta-become-seller">{t('startSelling')} ✦</Link>
           </div>
         </div>
       </section>

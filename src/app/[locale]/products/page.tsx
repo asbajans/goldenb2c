@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
 import styles from './products.module.css';
 
@@ -15,14 +16,11 @@ function getIcon(name: string) {
   return ICONS[k] || ICONS.default;
 }
 
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'price_asc', label: 'Price: Low to High' },
-  { value: 'price_desc', label: 'Price: High to Low' },
-  { value: 'popular', label: 'Most Popular' },
-];
-
 export default function ProductsPage() {
+  const t = useTranslations('Products');
+  const tc = useTranslations('Common');
+  const tCat = useTranslations('Categories');
+  
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('type') || '';
 
@@ -42,6 +40,13 @@ export default function ProductsPage() {
   const [priceError, setPriceError] = useState(false);
 
   const limit = 24;
+
+  const SORT_OPTIONS = [
+    { value: 'newest', label: t('newest') },
+    { value: 'price_asc', label: t('priceLowToHigh') },
+    { value: 'price_desc', label: t('priceHighToLow') },
+    { value: 'popular', label: t('bestSelling') },
+  ];
 
   const loadCategories = useCallback(() => {
     fetch('/api/categories')
@@ -113,14 +118,22 @@ export default function ProductsPage() {
   const totalPages = Math.ceil(total / limit);
   const hasFilters = activeCategory || search || minPrice || maxPrice;
 
+  const getCategoryLabel = (name: string) => {
+    const slugMap: Record<string, string> = {
+      rings: 'rings', necklaces: 'necklaces', bracelets: 'bracelets',
+      earrings: 'earrings', pendants: 'pendants', sets: 'sets'
+    };
+    return tCat(slugMap[name] || name);
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.pageTitle}>
-            {activeCategory ? `${getIcon(activeCategory)} ${activeCategory}` : '✦ All Products'}
+            {activeCategory ? `${getIcon(activeCategory)} ${getCategoryLabel(activeCategory)}` : `✦ ${t('allProducts')}`}
           </h1>
-          <span className={styles.pageCount}>{total} products found</span>
+          <span className={styles.pageCount}>{t('showingResults', { count: total })}</span>
         </div>
         
         <div className={styles.headerRight}>
@@ -130,7 +143,7 @@ export default function ProductsPage() {
             </svg>
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder={tc('search')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               className={styles.searchInput}
@@ -178,9 +191,9 @@ export default function ProductsPage() {
       <div className={styles.layout}>
         <aside className={styles.sidebar}>
           <div className={styles.sideSection}>
-            <h3 className={styles.sideTitle}>Categories</h3>
+            <h3 className={styles.sideTitle}>{tc('categories')}</h3>
             {catLoading ? (
-              <div className={styles.catSkeleton}>Loading...</div>
+              <div className={styles.catSkeleton}>{tc('loading')}</div>
             ) : (
               <ul className={styles.catList}>
                 <li>
@@ -188,7 +201,7 @@ export default function ProductsPage() {
                     className={`${styles.catItem} ${!activeCategory ? styles.catActive : ''}`}
                     onClick={() => handleCategory('')}
                   >
-                    <span>✦ All</span>
+                    <span>✦ {tc('viewAll')}</span>
                     <span className={styles.catCount}>
                       {categories.reduce((a, c) => a + (c.count || 0), 0)}
                     </span>
@@ -200,7 +213,7 @@ export default function ProductsPage() {
                       className={`${styles.catItem} ${activeCategory === cat.name ? styles.catActive : ''}`}
                       onClick={() => handleCategory(cat.name)}
                     >
-                      <span>{getIcon(cat.name)} {cat.name}</span>
+                      <span>{getIcon(cat.name)} {getCategoryLabel(cat.name)}</span>
                       <span className={styles.catCount}>{cat.count}</span>
                     </button>
                   </li>
@@ -210,7 +223,7 @@ export default function ProductsPage() {
           </div>
 
           <div className={styles.sideSection}>
-            <h3 className={styles.sideTitle}>Price Range</h3>
+            <h3 className={styles.sideTitle}>{t('priceRange')}</h3>
             <div className={styles.priceInputs}>
               <input
                 type="number"
@@ -232,13 +245,13 @@ export default function ProductsPage() {
             </div>
             {priceError && <p className={styles.priceError}>Min price must be less than max</p>}
             <button onClick={handlePriceFilter} className={styles.filterBtn}>
-              Apply Filter
+              {t('applyFilters')}
             </button>
           </div>
 
           {hasFilters && (
             <button onClick={clearFilters} className={styles.clearBtn}>
-              ✦ Clear All Filters
+              ✦ {t('clearFilters')}
             </button>
           )}
         </aside>
@@ -286,7 +299,7 @@ export default function ProductsPage() {
                     onClick={() => setPage(p => p - 1)}
                     className={styles.pgBtn}
                   >
-                    ← Prev
+                    ← {tc('viewAll').split(' ')[0]}
                   </button>
                   <div className={styles.pgNumbers}>
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -319,10 +332,10 @@ export default function ProductsPage() {
           ) : (
             <div className={styles.empty}>
               <div className={styles.emptyIcon}>✦</div>
-              <h3>No products found</h3>
-              <p>Try adjusting your filters or search term.</p>
+              <h3>{t('noProductsFound')}</h3>
+              <p>{t('tryDifferentFilters')}</p>
               <button onClick={clearFilters} className={styles.resetBtn}>
-                Clear Filters
+                {t('clearFilters')}
               </button>
             </div>
           )}

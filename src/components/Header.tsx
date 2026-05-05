@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import styles from './Header.module.css';
@@ -61,16 +62,35 @@ const ChevronIcon = () => (
   </svg>
 );
 
+const GlobeIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="2" y1="12" x2="22" y2="12"/>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </svg>
+);
+
+const LANGUAGES = [
+  { code: 'en', name: 'English', flag: '🇺🇸' },
+  { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+];
+
 export default function Header() {
+  const t = useTranslations('Common');
+  const locale = useLocale();
   const { user, loading, logout } = useAuth();
   const { cart } = useCart();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<Theme>('auto');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const pathname = usePathname();
 
   // Initialize theme from localStorage
@@ -106,6 +126,9 @@ export default function Header() {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserMenuOpen(false);
       }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setLangMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -119,9 +142,9 @@ export default function Header() {
   const ThemeTooltip = { auto: 'System', light: 'Light', dark: 'Dark' }[theme];
 
   const navLinks = [
-    { href: '/products', label: 'Shop' },
-    { href: '/categories', label: 'Categories' },
-    { href: '/sellers', label: 'Sellers' },
+    { href: '/products', label: t('shop') },
+    { href: '/categories', label: t('categories') },
+    { href: '/sellers', label: t('sellers') },
   ];
 
   return (
@@ -173,6 +196,40 @@ export default function Header() {
               {ThemeLabel}
               <span className={styles.themeBadge}>{ThemeTooltip}</span>
             </button>
+
+            {/* Language Switcher */}
+            <div className={styles.userMenu} ref={langMenuRef} style={{ position: 'relative' }}>
+              <button
+                className={styles.iconBtn}
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+                aria-label="Change language"
+                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <GlobeIcon />
+                <span style={{ fontSize: '12px', fontWeight: 500 }}>{locale.toUpperCase()}</span>
+              </button>
+              {langMenuOpen && (
+                <div className={styles.dropdown} style={{ right: 0, minWidth: '150px' }}>
+                  {LANGUAGES.map(lang => (
+                    <Link
+                      key={lang.code}
+                      href={pathname ? pathname.replace(`/${locale}`, `/${lang.code}`) : `/${lang.code}`}
+                      className={styles.dropdownItem}
+                      onClick={() => setLangMenuOpen(false)}
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        fontWeight: locale === lang.code ? 600 : 400
+                      }}
+                    >
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Cart */}
             <Link href="/cart" id="btn-cart" className={styles.iconBtn} aria-label="Cart">
