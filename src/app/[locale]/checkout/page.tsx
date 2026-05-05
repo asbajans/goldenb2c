@@ -23,6 +23,9 @@ interface Address {
 }
 
 export default function CheckoutPage() {
+  const t = useTranslations('Checkout');
+  const tc = useTranslations('Common');
+  
   const router = useRouter();
   const { cart, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
