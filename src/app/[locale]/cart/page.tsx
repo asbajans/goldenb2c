@@ -2,17 +2,21 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useCart } from '@/context/CartContext';
 import styles from './cart.module.css';
 
 export default function CartPage() {
+  const t = useTranslations('Cart');
+  const tc = useTranslations('Common');
+  
   const { cart, loading, updateItem, removeItem, clearCart } = useCart();
 
   if (loading) {
     return (
       <div className={styles.loading}>
         <div className={styles.spinner} />
-        <p>Loading cart...</p>
+        <p>{tc('loading')}</p>
       </div>
     );
   }
@@ -21,16 +25,16 @@ export default function CartPage() {
     return (
       <div className={styles.empty}>
         <div className={styles.emptyIcon}>🛒</div>
-        <h1>Your cart is empty</h1>
+        <h1>{t('emptyCart')}</h1>
         <p>Discover beautiful gold jewelry in our marketplace.</p>
-        <Link href="/products" className={styles.shopBtn}>Browse Products</Link>
+        <Link href="/products" className={styles.shopBtn}>{tc('continueShopping')}</Link>
       </div>
     );
   }
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Shopping Cart</h1>
+      <h1 className={styles.title}>{t('title')}</h1>
       
       <div className={styles.layout}>
         <div className={styles.items}>
@@ -56,7 +60,7 @@ export default function CartPage() {
                 )}
                 <p className={styles.itemSku}>SKU: {item.sku}</p>
                 <button onClick={() => removeItem(item.id)} className={styles.removeBtn}>
-                  Remove
+                  {t('remove')}
                 </button>
               </div>
               
@@ -74,36 +78,36 @@ export default function CartPage() {
           ))}
           
           <button onClick={clearCart} className={styles.clearBtn}>
-            Clear Cart
+            {t('emptyCart')}
           </button>
         </div>
         
         <div className={styles.summary}>
-          <h2>Order Summary</h2>
+          <h2>{t('orderSummary')}</h2>
           
           <div className={styles.summaryRow}>
-            <span>Subtotal ({cart.count} items)</span>
+            <span>{t('subtotal')} ({cart.count} {t('itemTotal').toLowerCase()})</span>
             <span>₺{Number(cart.total).toLocaleString('tr-TR')}</span>
           </div>
           
           <div className={styles.summaryRow}>
-            <span>Shipping</span>
+            <span>{t('shipping')}</span>
             <span>Calculated at checkout</span>
           </div>
           
           <div className={styles.divider} />
           
           <div className={styles.summaryRow + ' ' + styles.total}>
-            <span>Total</span>
+            <span>{t('total')}</span>
             <span>₺{Number(cart.total).toLocaleString('tr-TR')}</span>
           </div>
           
           <Link href="/checkout" className={styles.checkoutBtn}>
-            Proceed to Checkout
+            {t('proceedToCheckout')}
           </Link>
           
           <div className={styles.secure}>
-            <span>🔒 Secure Checkout</span>
+            <span>🔒 {tc('securePayment')}</span>
             <span>Multiple Payment Options</span>
           </div>
         </div>

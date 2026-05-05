@@ -96,7 +96,7 @@ export default function SellersPage() {
       ) : stores.length > 0 ? (
         <>
           <div className={styles.grid}>
-            {stores.map(store => <StoreCard key={store.id} store={store} />)}
+            {stores.map(store => <StoreCard key={store.id} store={store} t={t} />)}
           </div>
           {total > 24 && (
             <div className={styles.pagination}>
