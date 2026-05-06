@@ -60,11 +60,21 @@
     "title": "Kategoriler",
     "allCategories": "Tüm Kategoriler",
     "rings": "Yüzükler",
+    "Yüzük": "Yüzükler",
+    "yüzük": "Yüzükler",
     "necklaces": "Kolyeler",
+    "Kolye": "Kolyeler",
+    "kolye": "Kolyeler",
     "bracelets": "Bilezikler",
+    "Bilezik": "Bilezikler",
+    "bilezik": "Bilezikler",
     "earrings": "Küpeler",
+    "Küpe": "Küpeler",
+    "küpe": "Küpeler",
     "pendants": "Pandantifler",
-    "sets": "Setler"
+    "Pendant": "Pandantifler",
+    "sets": "Setler",
+    "Set": "Setler"
   },
   "Products": {
     "title": "Ürünler",

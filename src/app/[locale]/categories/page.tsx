@@ -47,9 +47,11 @@ export default function CategoriesPage() {
   const [page, setPage] = useState(1);
   const [selectedVariations, setSelectedVariations] = useState<Record<string, string>>({});
   const [selectedMilyem, setSelectedMilyem] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
 
   const categoryVariations = activeCategory ? CATEGORY_VARIATIONS[activeCategory.toLowerCase()] || [] : [];
-  const hasVariationFilters = categoryVariations.length > 0 || selectedMilyem;
+  const hasVariationFilters = categoryVariations.length > 0 || selectedMilyem || minPrice || maxPrice;
 
   useEffect(() => {
     fetch('/api/categories')
@@ -150,6 +152,32 @@ export default function CategoriesPage() {
                 ))}
               </ul>
             )}
+          </div>
+
+          <div className={styles.filterSection}>
+            <h3 className={styles.sideTitle}>{tp('priceRange')}</h3>
+            <div className={styles.priceInputs}>
+              <input
+                type="number"
+                placeholder="Min"
+                value={minPrice}
+                onChange={e => setMinPrice(e.target.value)}
+                className={styles.priceInput}
+                min="0"
+              />
+              <span className={styles.priceDash}>-</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={maxPrice}
+                onChange={e => setMaxPrice(e.target.value)}
+                className={styles.priceInput}
+                min="0"
+              />
+            </div>
+            <button onClick={() => { setPage(1); }} className={styles.filterBtn}>
+              {tp('applyFilters')}
+            </button>
           </div>
 
           {activeCategory && (

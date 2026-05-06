@@ -1,7 +1,7 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 9999;
   width: 100%;
   transition: var(--transition);
 }
@@ -13,6 +13,7 @@
   -webkit-backdrop-filter: var(--navbar-blur);
   border-bottom: 1px solid var(--border);
   transition: var(--transition);
+  overflow: visible;
 }
 
 .scrolled .topBar {
