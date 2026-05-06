@@ -369,7 +369,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
-  z-index: 50;
+  z-index: 9999;
 }
 
 .dropdownHeader {
