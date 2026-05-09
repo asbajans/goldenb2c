@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import styles from './orderDetail.module.css';
 
@@ -39,9 +39,10 @@ const statusLabels: Record<string, string> = {
   returned: 'Returned'
 };
 
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
+export default function OrderDetailPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const params = useParams<{id: string}>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -53,7 +54,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (!user || !params.id) return;
+    if (!user || !params?.id) return;
 
     async function fetchOrder() {
       try {
