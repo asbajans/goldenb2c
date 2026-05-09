@@ -6,14 +6,11 @@ import { Link } from '@/i18n/routing';
 import ProductCard from '@/components/ProductCard';
 import styles from './page.module.css';
 
-const CATEGORIES = [
-  { icon: '💍', slug: 'rings' },
-  { icon: '📿', slug: 'necklaces' },
-  { icon: '✨', slug: 'bracelets' },
-  { icon: '🌟', slug: 'earrings' },
-  { icon: '🔮', slug: 'pendants' },
-  { icon: '👑', slug: 'sets' },
-];
+const CATEGORY_ICONS: Record<string, string> = {
+  rings: '💍', necklaces: '📿', bracelets: '✨', earrings: '🌟',
+  pendants: '🔮', sets: '👑', kolye: '📿', bilezik: '✨',
+  yüzük: '💍', küpe: '🌟', default: '✦'
+};
 
 const TRUST_ITEMS = [
   { icon: '🔒', key: 'securePayments' },
@@ -22,14 +19,27 @@ const TRUST_ITEMS = [
   { icon: '✦', key: 'authenticGold' },
 ];
 
+function getCatIcon(name: string) {
+  return CATEGORY_ICONS[name?.toLowerCase()] || CATEGORY_ICONS.default;
+}
+
 export default function Home() {
   const t = useTranslations('Home');
   const tc = useTranslations('Common');
   const tCat = useTranslations('Categories');
-  
+
+  const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Fetch dynamic categories from DB (same source as products/categories pages)
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(d => setCategories(Array.isArray(d?.data) ? d.data.slice(0, 6) : []))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetch('/api/products?page=1&limit=16')
@@ -85,12 +95,20 @@ export default function Home() {
             <Link href="/categories" className={styles.seeAll}>{tc('seeAll')} →</Link>
           </div>
           <div className={styles.categoryGrid}>
-            {CATEGORIES.map(cat => (
-              <Link key={cat.slug} href={`/categories?type=${cat.slug}`} className={styles.catCard} id={`cat-${cat.slug}`}>
-                <div className={styles.catIcon}>{cat.icon}</div>
-                <span className={styles.catLabel}>{tCat(cat.slug)}</span>
+            {categories.length > 0 ? categories.map((cat: any) => (
+              <Link key={cat.name} href={`/categories?type=${cat.name}`} className={styles.catCard} id={`cat-${cat.name}`}>
+                <div className={styles.catIcon}>{getCatIcon(cat.name)}</div>
+                <span className={styles.catLabel}>{cat.name}</span>
               </Link>
-            ))}
+            )) : (
+              // Fallback skeleton while categories load
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className={styles.catCard} style={{ opacity: 0.4 }}>
+                  <div className={styles.catIcon}>✦</div>
+                  <span className={styles.catLabel}>&nbsp;</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
