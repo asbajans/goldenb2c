@@ -16,7 +16,9 @@ function getIcon(name: string) {
   return ICONS[k] || ICONS.default;
 }
 
-export default function ProductsPage() {
+import { Suspense } from 'react';
+
+function ProductsContent() {
   const t = useTranslations('Products');
   const tc = useTranslations('Common');
   const tCat = useTranslations('Categories');
@@ -342,5 +344,13 @@ export default function ProductsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '4rem', textAlign: 'center' }}>Loading products...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

@@ -111,8 +111,12 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (data.success || data.orderId) {
-        await clearCart();
-        router.push(`/order/${data.orderId || data.id}?success=1`);
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl;
+        } else {
+          await clearCart();
+          router.push(`/order/${data.orderId || data.id}?success=1`);
+        }
       } else {
         alert(data.error || 'Checkout failed');
       }

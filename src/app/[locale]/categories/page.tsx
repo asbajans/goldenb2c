@@ -29,7 +29,9 @@ function getIcon(name: string) {
   return ICONS[k] || ICONS.default;
 }
 
-export default function CategoriesPage() {
+import { Suspense } from 'react';
+
+function CategoriesContent() {
   const t = useTranslations('Categories');
   const tp = useTranslations('Products');
   const tc = useTranslations('Common');
@@ -283,5 +285,13 @@ export default function CategoriesPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function CategoriesPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '4rem', textAlign: 'center' }}>Loading categories...</div>}>
+      <CategoriesContent />
+    </Suspense>
   );
 }

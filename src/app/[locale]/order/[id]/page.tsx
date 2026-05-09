@@ -3,7 +3,9 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './order.module.css';
 
-export default function OrderSuccessPage() {
+import { Suspense } from 'react';
+
+function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
   const orderId = searchParams.get('orderId');
@@ -38,5 +40,13 @@ export default function OrderSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderSuccessPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OrderSuccessContent />
+    </Suspense>
   );
 }
