@@ -15,8 +15,6 @@ const LINKS = {
   Sellers: [
     { key: 'becomeSeller', href: '/sellers/join' },
     { key: 'browseStores', href: '/sellers' },
-    { key: 'sellerLogin', href: 'https://seller.asb.web.tr', external: true },
-    { key: 'adminPanel', href: 'https://admin.asb.web.tr', external: true },
   ],
   Company: [
     { key: 'about', href: '/about' },
@@ -43,14 +41,14 @@ export default function Footer() {
               {t('tagline')}
             </p>
             <div className={styles.socials}>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className={styles.socialBtn} id="footer-instagram">
+              <a href="https://www.instagram.com/golden.crafters/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className={styles.socialBtn} id="footer-instagram">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
               </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter/X" className={styles.socialBtn} id="footer-twitter">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+              <a href="https://www.youtube.com/channel/UCicnvsbNkEmg3PVtHvu9kkw" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className={styles.socialBtn} id="footer-youtube">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
               </a>
-              <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" aria-label="Pinterest" className={styles.socialBtn} id="footer-pinterest">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.04-2.83.18-.77 1.23-5.22 1.23-5.22s-.31-.63-.31-1.56c0-1.46.85-2.55 1.9-2.55.9 0 1.33.67 1.33 1.48 0 .9-.58 2.26-.87 3.51-.25 1.05.52 1.9 1.54 1.9 1.85 0 3.27-1.95 3.27-4.76 0-2.49-1.79-4.23-4.34-4.23-2.96 0-4.7 2.22-4.7 4.51 0 .89.34 1.85.77 2.37.08.1.09.19.07.29-.08.33-.25 1.05-.29 1.19-.05.19-.16.23-.37.14-1.39-.65-2.26-2.68-2.26-4.32 0-3.51 2.55-6.74 7.36-6.74 3.86 0 6.86 2.75 6.86 6.42 0 3.83-2.41 6.9-5.76 6.9-1.13 0-2.19-.59-2.55-1.28l-.69 2.59c-.25.97-.93 2.18-1.39 2.92C10.5 21.94 11.24 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
+              <a href="https://goldencrafterscom.etsy.com" target="_blank" rel="noopener noreferrer" aria-label="Etsy" className={styles.socialBtn} id="footer-etsy">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
               </a>
             </div>
           </div>
@@ -64,8 +62,6 @@ export default function Footer() {
                   const label = item.key === 'allProducts' ? tc('viewAll') : 
                     item.key === 'becomeSeller' ? tc('becomeSeller') : 
                     item.key === 'browseStores' ? tc('sellers') : 
-                    item.key === 'sellerLogin' ? 'Seller Login' : 
-                    item.key === 'adminPanel' ? 'Admin Panel' : 
                     item.key === 'about' ? t('aboutUs') : 
                     item.key === 'blog' ? tc('blog') : 
                     item.key === 'privacyPolicy' ? t('privacyPolicy') : 
