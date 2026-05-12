@@ -87,32 +87,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== CATEGORIES ===== */}
-      <section className={styles.section}>
-        <div className="container">
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>{t('shopByCategory')}</h2>
-            <Link href="/categories" className={styles.seeAll}>{tc('seeAll')} →</Link>
-          </div>
-          <div className={styles.categoryGrid}>
-            {categories.length > 0 ? categories.map((cat: any) => (
-              <Link key={cat.name} href={`/categories?type=${cat.name}`} className={styles.catCard} id={`cat-${cat.name}`}>
-                <div className={styles.catIcon}>{getCatIcon(cat.name)}</div>
-                <span className={styles.catLabel}>{cat.name}</span>
-              </Link>
-            )) : (
-              // Fallback skeleton while categories load
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className={styles.catCard} style={{ opacity: 0.4 }}>
-                  <div className={styles.catIcon}>✦</div>
-                  <span className={styles.catLabel}>&nbsp;</span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
       {/* ===== PRODUCTS ===== */}
       <section className={`${styles.section} ${styles.productSection}`}>
         <div className="container">
