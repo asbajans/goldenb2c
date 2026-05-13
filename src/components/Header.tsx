@@ -91,7 +91,24 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
   const pathname = usePathname();
+
+  // Fetch categories from API with current language
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`/api/categories?lang=${locale}`);
+        const data = await res.json();
+        if (data?.data) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+    fetchCategories();
+  }, [locale]);
 
   // Initialize theme from localStorage
   useEffect(() => {
@@ -140,10 +157,6 @@ export default function Header() {
 
   const ThemeLabel = { auto: <AutoIcon />, light: <SunIcon />, dark: <MoonIcon /> }[theme];
   const ThemeTooltip = { auto: 'System', light: 'Light', dark: 'Dark' }[theme];
-
-  const navLinks = [
-    { href: '/products', label: t('shop') },
-  ];
 
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
@@ -214,9 +227,9 @@ export default function Header() {
                       href={pathname ? pathname.replace(`/${locale}`, `/${lang.code}`) : `/${lang.code}`}
                       className={styles.dropdownItem}
                       onClick={() => setLangMenuOpen(false)}
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: '8px',
                         fontWeight: locale === lang.code ? 600 : 400
                       }}
@@ -242,7 +255,7 @@ export default function Header() {
               </div>
             ) : user ? (
               <div className={styles.userMenu} ref={userMenuRef}>
-                <button 
+                <button
                   className={styles.userBtn}
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   aria-label="User menu"
@@ -308,17 +321,10 @@ export default function Header() {
       {/* Nav Bar */}
       <nav className={styles.navbar}>
         <div className={styles.container}>
-          <div className={styles.navLinks}>
-            {navLinks.map(link => (
-              <Link key={link.href} href={link.href} className={`${styles.navLink} ${pathname?.includes(link.href) ? styles.active : ''}`}>
-                {link.label}
-              </Link>
-            ))}
-          </div>
           <div className={styles.navCategories}>
-            {['Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Pendants', 'Sets'].map(cat => (
-              <Link key={cat} href={`/categories?type=${cat.toLowerCase()}`} className={styles.catLink}>
-                {cat}
+            {categories.map(cat => (
+              <Link key={cat.id} href={`/categories?type=${cat.name}`} className={styles.catLink}>
+                {cat.name}
               </Link>
             ))}
           </div>
@@ -336,12 +342,9 @@ export default function Header() {
               className={styles.searchInput}
             />
           </div>
-          {navLinks.map(link => (
-            <Link key={link.href} href={link.href} className={styles.mobileLink}>{link.label}</Link>
-          ))}
           <div className={styles.mobileCats}>
-            {['Rings', 'Necklaces', 'Bracelets', 'Earrings'].map(c => (
-              <Link key={c} href={`/categories?type=${c.toLowerCase()}`} className={styles.mobileCat}>{c}</Link>
+            {categories.map(cat => (
+              <Link key={cat.id} href={`/categories?type=${cat.name}`} className={styles.mobileCat}>{cat.name}</Link>
             ))}
           </div>
         </div>

@@ -225,6 +225,8 @@
 .navCategories {
   display: flex;
   gap: 0;
+  flex-wrap: wrap;
+  overflow: hidden;
 }
 
 .catLink {
@@ -234,6 +236,8 @@
   color: var(--text-muted);
   border-radius: 9999px;
   transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .catLink:hover {
