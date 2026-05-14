@@ -283,12 +283,15 @@
 
 .productGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .productItem {
   animation: fadeInUp 0.5s ease-out both;
+  min-width: 0;
 }
 
 /* ===== TRUST ===== */
@@ -419,7 +422,7 @@
   .catCard { padding: 1rem 0.5rem; }
   .catIcon { font-size: 1.5rem; }
   .catLabel { font-size: 0.72rem; }
-  .productGrid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+  .productGrid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
   .trustGrid { grid-template-columns: 1fr; gap: 1rem; }
   .trustItem { gap: 0.6rem; }
   .trustIcon { width: 40px; height: 40px; font-size: 1.5rem; }

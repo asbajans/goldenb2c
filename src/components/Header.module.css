@@ -17,16 +17,6 @@
   overflow-x: hidden;
 }
 
-/* Top Bar */
-.topBar {
-  background: var(--bg-glass);
-  backdrop-filter: var(--navbar-blur);
-  -webkit-backdrop-filter: var(--navbar-blur);
-  border-bottom: 1px solid var(--border);
-  transition: var(--transition);
-  overflow: visible;
-}
-
 .scrolled .topBar {
   box-shadow: 0 4px 24px rgba(0,0,0,0.12);
   border-bottom-color: var(--gold);
@@ -225,7 +215,10 @@
 .navbar .container {
   height: 42px;
   justify-content: space-between;
-  min-width: min-content;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: visible;
+  flex-wrap: nowrap;
 }
 
 .navLinks {
