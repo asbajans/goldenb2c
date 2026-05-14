@@ -111,6 +111,12 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (data.success || data.orderId) {
+        sessionStorage.setItem('lastOrder', JSON.stringify({
+          id: data.orderId || data.id,
+          total: data.total || 0,
+          currency: 'TRY'
+        }));
+
         if (data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
         } else {

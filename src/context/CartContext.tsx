@@ -128,6 +128,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         total,
         status: 'pending'
       });
+
+      window.dispatchEvent(new CustomEvent('track:addToCart', {
+        detail: { productId: productData.productId, quantity: productData.quantity || 1 }
+      }));
     } catch (error) {
       console.error('Add to cart error:', error);
     } finally {
