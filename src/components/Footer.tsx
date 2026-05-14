@@ -56,7 +56,7 @@ export default function Footer() {
           {/* Links */}
           {Object.entries(LINKS).map(([section, items]) => (
             <div key={section} className={styles.linkGroup}>
-              <h4 className={styles.linkTitle}>{section === 'Shop' ? tc('shop') : section === 'Sellers' ? tc('sellers') : t(section.toLowerCase())}</h4>
+              <h4 className={styles.linkTitle}>{section === 'Shop' ? tc('shop') : section === 'Sellers' ? tc('sellers') : 'Company'}</h4>
               <ul className={styles.linkList}>
                 {items.map((item: any) => {
                   const label = item.key === 'allProducts' ? tc('viewAll') : 
@@ -94,7 +94,7 @@ export default function Footer() {
           <p className={styles.copy}>© {new Date().getFullYear()} Golden Crafters Marketplace. {t('allRightsReserved')}</p>
           <div className={styles.badges}>
             <span className={styles.badge}>🔒 {t('securePayment')}</span>
-            <span className={styles.badge}>✦ {t('authenticGold')}</span>
+            <span className={styles.badge}>✦ {t('authenticated')}</span>
             <span className={styles.badge}>🌍 {t('globalShipping')}</span>
           </div>
         </div>

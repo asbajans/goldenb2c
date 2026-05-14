@@ -209,7 +209,7 @@ export default function Header() {
             </button>
 
             {/* Language Switcher */}
-            <div className={styles.userMenu} ref={langMenuRef} style={{ position: 'relative' }}>
+            <div className={`${styles.userMenu} ${styles.langMenu}`} ref={langMenuRef} style={{ position: 'relative' }}>
               <button
                 className={styles.iconBtn}
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
