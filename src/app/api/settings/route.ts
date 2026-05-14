@@ -4,8 +4,8 @@ const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr/api';
 
 export async function GET() {
   try {
-    const res = await fetch(`${BACKEND}/admin/settings`, {
-      credentials: 'include'
+    const res = await fetch(`${BACKEND}/settings/public`, {
+      next: { revalidate: 60 }
     });
     const data = await res.json();
     return NextResponse.json(data);
