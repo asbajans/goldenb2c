@@ -33,7 +33,7 @@ export async function GET() {
     for (const city of cities) {
       urls.push(`  <url><loc>${SITE_URL}/${locale}/location/${city.slug}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`);
       for (const cat of cats) {
-        urls.push(`  <url><loc>${SITE_URL}/${locale}/location/${city.slug}?category=${cat.slug}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>`);
+        urls.push(`  <url><loc>${SITE_URL}/${locale}/location/${city.slug}?type=${encodeURIComponent(cat.name)}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>`);
       }
     }
   }

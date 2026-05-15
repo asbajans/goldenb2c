@@ -4,14 +4,14 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
-import { LOCALE_CATEGORIES, LOCALE_CITIES, CityInfo } from '@/data/cities';
+import { LOCALE_CATEGORIES, LOCALE_CITIES } from '@/data/cities';
 
 export default function LocationPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const locale = useLocale();
   const citySlug = params?.city as string || '';
-  const categorySlug = searchParams?.get('category') || '';
+  const typeParam = searchParams?.get('type') || '';
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,34 +20,31 @@ export default function LocationPage() {
   const categories = LOCALE_CATEGORIES[locale] || LOCALE_CATEGORIES.en;
 
   const cityInfo = cities.find(c => c.slug === citySlug);
-  const currentCat = categories.find(c => c.slug === categorySlug);
 
   useEffect(() => {
     if (!citySlug) return;
-    const catName = currentCat?.name || '';
-    const params = new URLSearchParams({ page: '1', limit: '24' });
-    if (catName) params.set('category', catName);
-    fetch(`/api/products?${params.toString()}`)
+    setLoading(true);
+    const query = new URLSearchParams({ page: '1', limit: '24' });
+    if (typeParam) query.set('category', typeParam);
+    fetch(`/api/products?${query.toString()}`)
       .then(r => r.json())
       .then(data => {
         setProducts(Array.isArray(data?.data) ? data.data : []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [citySlug, categorySlug, currentCat?.name]);
+  }, [citySlug, typeParam]);
 
   return (
     <div>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '2rem 1.5rem' }}>
-        <h1>
-          {cityInfo?.name || citySlug.replace(/-/g, ' ')}
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: 4 }}>
+          {cityInfo?.name || citySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
           {' '}Gold Jewelry
-          {currentCat ? ` - ${currentCat.name}` : ''}
         </h1>
-        <p style={{ color: '#666', marginBottom: '2rem', fontSize: '0.95rem' }}>
-          {cityInfo?.name || citySlug} premium gold jewelry.
-          {cityInfo ? ` ${cityInfo.country}.` : ''}
-          {currentCat ? ` Shop our collection of ${currentCat.name.toLowerCase()}.` : ''}
+        <p style={{ color: '#666', marginBottom: '1.5rem' }}>
+          {cityInfo ? `${cityInfo.country}. ` : ''}
+          {typeParam || 'All categories'}
         </p>
 
         {/* Category filters */}
@@ -56,9 +53,9 @@ export default function LocationPage() {
             href={`/${locale}/location/${citySlug}`}
             style={{
               padding: '6px 16px', borderRadius: 20, border: '1px solid #ddd',
-              background: !categorySlug ? '#c9963c' : 'transparent',
-              color: !categorySlug ? '#fff' : '#333',
-              fontSize: 14, textDecoration: 'none', transition: 'all 0.2s'
+              background: !typeParam ? '#c9963c' : 'transparent',
+              color: !typeParam ? '#fff' : '#333',
+              fontSize: 14, textDecoration: 'none'
             }}
           >
             All
@@ -66,12 +63,12 @@ export default function LocationPage() {
           {categories.map(cat => (
             <Link
               key={cat.slug}
-              href={`/${locale}/location/${citySlug}?category=${cat.slug}`}
+              href={`/${locale}/location/${citySlug}?type=${encodeURIComponent(cat.name)}`}
               style={{
                 padding: '6px 16px', borderRadius: 20, border: '1px solid #ddd',
-                background: categorySlug === cat.slug ? '#c9963c' : 'transparent',
-                color: categorySlug === cat.slug ? '#fff' : '#333',
-                fontSize: 14, textDecoration: 'none', transition: 'all 0.2s'
+                background: typeParam === cat.name ? '#c9963c' : 'transparent',
+                color: typeParam === cat.name ? '#fff' : '#333',
+                fontSize: 14, textDecoration: 'none'
               }}
             >
               {cat.name}
@@ -79,7 +76,6 @@ export default function LocationPage() {
           ))}
         </div>
 
-        {/* Products */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#999' }}>Loading...</div>
         ) : products.length === 0 ? (
