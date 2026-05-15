@@ -37,6 +37,14 @@ export const LOCALE_CATEGORIES: Record<string, { slug: string; name: string }[]>
     { slug: 'dulaya', name: 'دلايات' },
     { slug: 'majmueat', name: 'مجموعات' },
   ],
+  es: [
+    { slug: 'anillos', name: 'Anillos' },
+    { slug: 'collares', name: 'Collares' },
+    { slug: 'pulseras', name: 'Pulseras' },
+    { slug: 'aretes', name: 'Aretes' },
+    { slug: 'colgantes', name: 'Colgantes' },
+    { slug: 'juegos', name: 'Juegos' },
+  ],
 };
 
 export const LOCALE_CITIES: Record<string, CityInfo[]> = {
@@ -175,6 +183,29 @@ export const LOCALE_CITIES: Record<string, CityInfo[]> = {
     { slug: 'casablanca', name: 'الدار البيضاء', country: 'المغرب' },
     { slug: 'tunis', name: 'تونس', country: 'تونس' },
   ],
+  es: [
+    { slug: 'madrid', name: 'Madrid', country: 'España' },
+    { slug: 'barcelona', name: 'Barcelona', country: 'España' },
+    { slug: 'valencia', name: 'Valencia', country: 'España' },
+    { slug: 'sevilla', name: 'Sevilla', country: 'España' },
+    { slug: 'bilbao', name: 'Bilbao', country: 'España' },
+    { slug: 'malaga', name: 'Málaga', country: 'España' },
+    { slug: 'granada', name: 'Granada', country: 'España' },
+    { slug: 'alicante', name: 'Alicante', country: 'España' },
+    { slug: 'zaragoza', name: 'Zaragoza', country: 'España' },
+    { slug: 'palma', name: 'Palma de Mallorca', country: 'España' },
+    { slug: 'murcia', name: 'Murcia', country: 'España' },
+    { slug: 'salamanca', name: 'Salamanca', country: 'España' },
+    { slug: 'tenerife', name: 'Tenerife', country: 'España' },
+    { slug: 'gran-canaria', name: 'Gran Canaria', country: 'España' },
+    { slug: 'ibiza', name: 'Ibiza', country: 'España' },
+    { slug: 'mexico-city', name: 'Ciudad de México', country: 'México' },
+    { slug: 'buenos-aires', name: 'Buenos Aires', country: 'Argentina' },
+    { slug: 'bogota', name: 'Bogotá', country: 'Colombia' },
+    { slug: 'lima', name: 'Lima', country: 'Perú' },
+    { slug: 'santiago', name: 'Santiago', country: 'Chile' },
+    { slug: 'caracas', name: 'Caracas', country: 'Venezuela' },
+  ],
 };
 
 // Map: locale category name -> English DB category name for product API queries
@@ -182,6 +213,7 @@ const LOCALE_TO_DB_CATEGORY: Record<string, Record<string, string>> = {
   en: { Rings: 'rings', Necklaces: 'necklaces', Bracelets: 'bracelets', Earrings: 'earrings', Pendants: 'pendants', Sets: 'sets' },
   tr: { Yüzük: 'rings', Kolye: 'necklaces', Bilezik: 'bracelets', Küpe: 'earrings', 'Kolye Ucu': 'pendants', 'Takı Seti': 'sets' },
   it: { Anelli: 'rings', Collane: 'necklaces', Bracciali: 'bracelets', Orecchini: 'earrings', Ciondoli: 'pendants', Set: 'sets' },
+  es: { Anillos: 'rings', Collares: 'necklaces', Pulseras: 'bracelets', Aretes: 'earrings', Colgantes: 'pendants', Juegos: 'sets' },
   ar: { 'خواتم': 'rings', 'قلائد': 'necklaces', 'أساور': 'bracelets', 'أقراط': 'earrings', 'دلايات': 'pendants', 'مجموعات': 'sets' },
 };
 

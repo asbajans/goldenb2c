@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const BACKEND = 'https://api.asb.web.tr/api';
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  const { searchParams, pathname } = new URL(request.url);
   const page = searchParams.get('page') || '1';
   const limit = searchParams.get('limit') || '24';
   const search = searchParams.get('search') || '';
@@ -12,8 +12,9 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || '';
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
+  const lang = searchParams.get('lang') || pathname?.split('/')[2] || 'en';
 
-  let url = `${BACKEND}/marketplace/products?page=${page}&limit=${limit}`;
+  let url = `${BACKEND}/marketplace/products?page=${page}&limit=${limit}&lang=${lang}`;
   if (search) url += `&search=${search}`;
   if (category) url += `&category=${encodeURIComponent(category)}`;
   if (storeSlug) url += `&storeSlug=${storeSlug}`;
