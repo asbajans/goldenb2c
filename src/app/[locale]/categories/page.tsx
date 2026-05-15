@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
 import styles from './categories.module.css';
+import { getDbCategoryName, getCategoryBySlug, LOCALE_CATEGORIES } from '@/data/cities';
 
 const ICONS: Record<string, string> = {
   rings: '💍', necklaces: '📿', bracelets: '✨', earrings: '🌟',
