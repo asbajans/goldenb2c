@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
 import styles from './products.module.css';
 
@@ -40,6 +40,7 @@ function ProductsContent() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [priceError, setPriceError] = useState(false);
+  const locale = useLocale();
 
   const limit = 24;
 
@@ -51,12 +52,12 @@ function ProductsContent() {
   ];
 
   const loadCategories = useCallback(() => {
-    fetch('/api/categories')
+    fetch(`/api/categories?lang=${locale}`)
       .then(r => r.json())
       .then(d => setCategories(Array.isArray(d?.data) ? d.data : []))
       .catch(console.error)
       .finally(() => setCatLoading(false));
-  }, []);
+  }, [locale]);
 
   const loadProducts = useCallback(() => {
     setLoading(true);
@@ -69,6 +70,7 @@ function ProductsContent() {
     if (search) params.set('search', search);
     if (minPrice) params.set('minPrice', minPrice);
     if (maxPrice) params.set('maxPrice', maxPrice);
+    params.set('lang', locale);
 
     fetch(`/api/products?${params.toString()}`)
       .then(r => r.json())

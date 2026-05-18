@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import ProductCard from '@/components/ProductCard';
 import styles from './page.module.css';
@@ -32,17 +32,18 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const locale = useLocale();
 
   // Fetch dynamic categories from DB (same source as products/categories pages)
   useEffect(() => {
-    fetch('/api/categories')
+    fetch(`/api/categories?lang=${locale}`)
       .then(r => r.json())
       .then(d => setCategories(Array.isArray(d?.data) ? d.data.slice(0, 6) : []))
       .catch(console.error);
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
-    fetch('/api/products?page=1&limit=16')
+    fetch(`/api/products?page=1&limit=16&lang=${locale}`)
       .then(r => r.json())
       .then(data => {
         setProducts(Array.isArray(data?.data) ? data.data : []);
@@ -50,7 +51,7 @@ export default function Home() {
       })
       .catch(err => console.error('Product fetch error:', err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [locale]);
 
   return (
     <main className={styles.main}>

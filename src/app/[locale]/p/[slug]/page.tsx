@@ -38,6 +38,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params?.slug as string;
+  const locale = params?.locale as string || 'en';
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
@@ -50,7 +51,7 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!slug) return;
-    fetch(`/api/products/${slug}`)
+    fetch(`/api/products/${slug}?lang=${locale}`)
       .then(r => r.json())
       .then(d => {
         setProduct(d);
@@ -58,7 +59,7 @@ export default function ProductDetailPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, locale]);
 
   useEffect(() => {
     if (!user || !product?.id) return;

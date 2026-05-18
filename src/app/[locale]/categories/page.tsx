@@ -52,17 +52,18 @@ function CategoriesContent() {
   const [selectedMilyem, setSelectedMilyem] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const locale = useLocale();
 
   const categoryVariations = activeCategory ? CATEGORY_VARIATIONS[activeCategory.toLowerCase()] || [] : [];
   const hasVariationFilters = categoryVariations.length > 0 || selectedMilyem || minPrice || maxPrice;
 
   useEffect(() => {
-    fetch('/api/categories')
+    fetch(`/api/categories?lang=${locale}`)
       .then(r => r.json())
       .then(d => setCategories(Array.isArray(d?.data) ? d.data : []))
       .catch(console.error)
       .finally(() => setCatLoading(false));
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     setLoading(true);
@@ -71,6 +72,7 @@ function CategoriesContent() {
     if (search) params.set('search', search);
     if (selectedMilyem) params.set('milyem', selectedMilyem);
     
+    params.set('lang', locale);
     fetch(`/api/products?${params.toString()}`)
       .then(r => r.json())
       .then(d => { setProducts(Array.isArray(d?.data) ? d.data : []); setTotal(d?.pagination?.total ?? 0); })
