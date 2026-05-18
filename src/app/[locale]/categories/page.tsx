@@ -131,26 +131,26 @@ function CategoriesContent() {
         <aside className={styles.sidebar}>
           <div className={styles.filterSection}>
             <h3 className={styles.sideTitle}>Categories</h3>
-            {catLoading ? (
+                {catLoading ? (
               <div className={styles.catSkeleton}>Loading...</div>
             ) : (
               <ul className={styles.catList}>
                 <li>
                   <button
-                    className={`${styles.catItem} ${!activeCategory ? styles.catActive : ''}`}
-                    onClick={() => handleCategory('')}
+                        className={`${styles.catItem} ${!activeCategory ? styles.catActive : ''}`}
+                        onClick={() => handleCategory('')}
                   >
-                    <span>✦ All</span>
-                    <span className={styles.catCount}>{categories.reduce((a, c) => a + (c.count || 0), 0)}</span>
+                        <span>✦ All</span>
+                        <span className={styles.catCount}>{categories.reduce((a, c) => a + (c.count || 0), 0)}</span>
                   </button>
                 </li>
                 {categories.map((cat: any) => (
-                  <li key={cat.name}>
+                  <li key={cat.slug}>
                     <button
-                      className={`${styles.catItem} ${activeCategory === cat.name ? styles.catActive : ''}`}
-                      onClick={() => handleCategory(cat.name)}
+                      className={`${styles.catItem} ${activeCategory === cat.slug ? styles.catActive : ''}`}
+                      onClick={() => handleCategory(cat.slug)}
                     >
-                      <span>{getIcon(cat.name)} {cat.name}</span>
+                      <span>{getIcon(cat.slug)} {cat.name}</span>
                       <span className={styles.catCount}>{cat.count}</span>
                     </button>
                   </li>

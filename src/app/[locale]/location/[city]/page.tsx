@@ -63,11 +63,11 @@ export default function LocationPage() {
           {categories.map(cat => (
             <Link
               key={cat.slug}
-              href={`/${locale}/location/${citySlug}?type=${encodeURIComponent(cat.name)}`}
+              href={`/${locale}/location/${citySlug}?type=${encodeURIComponent(cat.slug)}`}
               style={{
                 padding: '6px 16px', borderRadius: 20, border: '1px solid #ddd',
-                background: typeParam === cat.name ? '#c9963c' : 'transparent',
-                color: typeParam === cat.name ? '#fff' : '#333',
+                background: typeParam === cat.slug ? '#c9963c' : 'transparent',
+                color: typeParam === cat.slug ? '#fff' : '#333',
                 fontSize: 14, textDecoration: 'none'
               }}
             >

@@ -87,7 +87,7 @@ export default function ProductDetailPage() {
     <div className={styles.notFound}>
       <div className={styles.notFoundIcon}>✦</div>
       <h1>Product Not Found</h1>
-      <a href="/products" className={styles.backBtn}>← Browse Products</a>
+      <a href={`/${locale}/products`} className={styles.backBtn}>← Browse Products</a>
     </div>
   );
 
@@ -141,10 +141,10 @@ export default function ProductDetailPage() {
       />
       <div className={styles.page}>
       <div className={styles.breadcrumb}>
-        <a href="/">Home</a>
+        <a href={`/${locale}`}>Home</a>
         <span>→</span>
-        <a href="/products">Products</a>
-        {product.category && <><span>→</span><a href={`/categories?type=${product.category}`}>{product.category}</a></>}
+        <a href={`/${locale}/products`}>Products</a>
+        {product.category && <><span>→</span><a href={`/${locale}/categories?type=${encodeURIComponent(product.category)}`}>{product.category}</a></>}
         <span>→</span>
         <span>{product.title}</span>
       </div>
@@ -187,7 +187,7 @@ export default function ProductDetailPage() {
         {/* ── INFO ── */}
         <div className={styles.info}>
           {product.category && (
-            <a href={`/categories?type=${product.category}`} className={styles.catPill}>
+            <a href={`/${locale}/categories?type=${encodeURIComponent(product.category)}`} className={styles.catPill}>
               {product.category}
             </a>
           )}

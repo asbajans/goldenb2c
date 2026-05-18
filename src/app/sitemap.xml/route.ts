@@ -33,7 +33,7 @@ export async function GET() {
     for (const city of cities) {
       urls.push(`  <url><loc>${SITE_URL}/${locale}/location/${city.slug}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`);
       for (const cat of cats) {
-        urls.push(`  <url><loc>${SITE_URL}/${locale}/location/${city.slug}?type=${encodeURIComponent(cat.name)}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>`);
+        urls.push(`  <url><loc>${SITE_URL}/${locale}/location/${city.slug}?type=${encodeURIComponent(cat.slug || cat.name)}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>`);
       }
     }
   }
@@ -42,7 +42,7 @@ export async function GET() {
   for (const locale of LOCALES) {
     const cats = LOCALE_CATEGORIES[locale] || [];
     for (const cat of cats) {
-      urls.push(`  <url><loc>${SITE_URL}/${locale}/categories?type=${cat.name}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`);
+      urls.push(`  <url><loc>${SITE_URL}/${locale}/categories?type=${encodeURIComponent(cat.slug || cat.name)}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>`);
     }
   }
 

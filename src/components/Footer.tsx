@@ -26,8 +26,8 @@ export default function Footer() {
   const shopLinks = [
     { key: 'allProducts', href: '/products', label: tc('viewAll') },
     ...categories.map((cat: any) => ({
-      key: cat.name,
-      href: `/categories?type=${encodeURIComponent(cat.name)}`,
+      key: cat.slug || cat.name,
+      href: `/${locale}/categories?type=${encodeURIComponent(cat.slug || cat.name)}`,
       label: cat.name,
     })),
   ];

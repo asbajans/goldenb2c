@@ -212,12 +212,12 @@ function ProductsContent() {
                   </button>
                 </li>
                 {categories.map((cat: any) => (
-                  <li key={cat.name}>
+                  <li key={cat.slug}>
                     <button
-                      className={`${styles.catItem} ${activeCategory === cat.name ? styles.catActive : ''}`}
-                      onClick={() => handleCategory(cat.name)}
+                      className={`${styles.catItem} ${activeCategory === cat.slug ? styles.catActive : ''}`}
+                      onClick={() => handleCategory(cat.slug)}
                     >
-                      <span>{getIcon(cat.name)} {getCategoryLabel(cat.name)}</span>
+                      <span>{getIcon(cat.slug)} {cat.name}</span>
                       <span className={styles.catCount}>{cat.count}</span>
                     </button>
                   </li>

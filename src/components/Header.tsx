@@ -324,7 +324,7 @@ export default function Header() {
         <div className={styles.container}>
           <div className={styles.navCategories}>
             {categories.map(cat => (
-              <Link key={cat.id} href={`/categories?type=${cat.name}`} className={styles.catLink}>
+              <Link key={cat.id} href={`/${locale}/categories?type=${encodeURIComponent(cat.slug || cat.name)}`} className={styles.catLink}>
                 {cat.name}
               </Link>
             ))}
@@ -345,7 +345,7 @@ export default function Header() {
           </div>
           <div className={styles.mobileCats}>
             {categories.map(cat => (
-              <Link key={cat.id} href={`/categories?type=${cat.name}`} className={styles.mobileCat}>{cat.name}</Link>
+              <Link key={cat.id} href={`/${locale}/categories?type=${encodeURIComponent(cat.slug || cat.name)}`} className={styles.mobileCat}>{cat.name}</Link>
             ))}
           </div>
         </div>

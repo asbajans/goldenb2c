@@ -1,5 +1,7 @@
+'use client';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useLocale } from 'next-intl';
 import styles from './ProductCard.module.css';
 
 export interface ProductCardProps {
@@ -17,8 +19,10 @@ export interface ProductCardProps {
 export default function ProductCard({ id, title, price, priceUSD, storeName, imageUrl, slug, category, isNew }: ProductCardProps) {
   const hasImage = imageUrl && imageUrl !== '/placeholder.jpg' && !imageUrl.startsWith('data:image');
   
+  const locale = useLocale();
+
   return (
-    <Link href={`/p/${slug}`} className={styles.card} id={`product-${id}`}>
+    <Link href={`/${locale}/p/${slug}`} className={styles.card} id={`product-${id}`}>
       <div className={styles.imageContainer}>
         {hasImage ? (
           <Image
