@@ -54,6 +54,14 @@ function CategoriesContent() {
   const [maxPrice, setMaxPrice] = useState('');
   const locale = useLocale();
 
+  // Sync activeCategory with URL searchParams on navigation (Header/Footer clicks)
+  useEffect(() => {
+    setActiveCategory(typeParam);
+    setSelectedVariations({});
+    setSelectedMilyem('');
+    setPage(1);
+  }, [typeParam]);
+
   const categoryVariations = activeCategory ? CATEGORY_VARIATIONS[activeCategory.toLowerCase()] || [] : [];
   const hasVariationFilters = categoryVariations.length > 0 || selectedMilyem || minPrice || maxPrice;
 

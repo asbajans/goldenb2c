@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -94,6 +94,14 @@ export default function Header() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent | React.MouseEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/${locale}/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   // Fetch categories from API with current language
   useEffect(() => {
@@ -173,12 +181,20 @@ export default function Header() {
           {/* Center Search */}
           <div className={`${styles.searchWrap} ${searchOpen ? styles.searchActive : ''}`}>
             <div className={styles.searchBox}>
-              <SearchIcon />
+              <button
+                type="button"
+                onClick={handleSearch}
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex' }}
+                aria-label="Search"
+              >
+                <SearchIcon />
+              </button>
               <input
                 type="text"
                 placeholder="Search jewelry, gold, stores..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleSearch(e); }}
                 className={styles.searchInput}
                 id="header-search"
               />

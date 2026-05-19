@@ -12,10 +12,11 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || '';
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
+  const hideOutOfStock = searchParams.get('hideOutOfStock') || 'true';
   const lang = searchParams.get('lang') || pathname?.split('/')[2] || 'en';
 
-  let url = `${BACKEND}/marketplace/products?page=${page}&limit=${limit}&lang=${lang}`;
-  if (search) url += `&search=${search}`;
+  let url = `${BACKEND}/marketplace/products?page=${page}&limit=${limit}&hideOutOfStock=${hideOutOfStock}&lang=${lang}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
   if (category) url += `&category=${encodeURIComponent(category)}`;
   if (storeSlug) url += `&storeSlug=${storeSlug}`;
   if (sort) url += `&sort=${sort}`;
