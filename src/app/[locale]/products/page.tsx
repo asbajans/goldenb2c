@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
 import styles from './products.module.css';
@@ -41,6 +41,18 @@ function ProductsContent() {
   const [maxPrice, setMaxPrice] = useState('');
   const [priceError, setPriceError] = useState(false);
   const locale = useLocale();
+  const router = useRouter();
+
+  // Sync activeCategory and search with URL searchParams on navigation (Header/Footer clicks)
+  useEffect(() => {
+    const urlType = searchParams.get('type') || '';
+    const urlSearch = searchParams.get('search') || '';
+    setActiveCategory(urlType);
+    setSearch(urlSearch);
+    setPage(1);
+    setMinPrice('');
+    setMaxPrice('');
+  }, [searchParams]);
 
   const limit = 24;
 
@@ -95,7 +107,10 @@ function ProductsContent() {
   }, [activeCategory, search, sort, minPrice, maxPrice]);
 
   const handleCategory = (name: string) => {
-    setActiveCategory(prev => prev === name ? '' : name);
+    const next = name === activeCategory ? '' : name;
+    setActiveCategory(next);
+    const url = next ? `/${locale}/products?type=${encodeURIComponent(next)}` : `/${locale}/products`;
+    router.replace(url);
   };
 
   const handlePriceFilter = () => {
@@ -141,19 +156,6 @@ function ProductsContent() {
         </div>
         
         <div className={styles.headerRight}>
-          <div className={styles.searchWrap}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-              <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input
-              type="text"
-              placeholder={tc('search')}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className={styles.searchInput}
-            />
-          </div>
-
           <select
             value={sort}
             onChange={e => setSort(e.target.value)}

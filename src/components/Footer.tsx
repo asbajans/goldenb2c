@@ -27,7 +27,7 @@ export default function Footer() {
     { key: 'allProducts', href: '/products', label: tc('viewAll') },
     ...categories.map((cat: any) => ({
       key: cat.slug || cat.name,
-      href: `/${locale}/categories?type=${encodeURIComponent(cat.slug || cat.name)}`,
+      href: `/${locale}/products?type=${encodeURIComponent(cat.slug || cat.name)}`,
       label: cat.name,
     })),
   ];
