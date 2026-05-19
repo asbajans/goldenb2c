@@ -9,7 +9,6 @@ import styles from './page.module.css';
 const TRUST_ITEMS = [
   { icon: '🔒', key: 'securePayments' },
   { icon: '🌍', key: 'globalShipping' },
-  { icon: '🤖', key: 'aiPowered' },
   { icon: '✦', key: 'authenticGold' },
 ];
 
@@ -102,7 +101,6 @@ export default function Home() {
               <div className={styles.sectionHeader}>
                 <div>
                   <h2 className={styles.sectionTitle}>{cat.name}</h2>
-                  <p className={styles.sectionSub}>{t('curatedByAI')}</p>
                 </div>
                 <Link href={`/products?type=${encodeURIComponent(cat.slug)}`} className={styles.seeAll}>{tc('viewAll')} →</Link>
               </div>
