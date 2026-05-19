@@ -276,7 +276,29 @@
   text-align: center;
 }
 
-/* ===== PRODUCTS ===== */
+/* ===== CATEGORY PRODUCT SECTIONS ===== */
+.catProductSection {
+  background: var(--bg-secondary);
+}
+
+.catProductSection + .catProductSection {
+  border-top: 1px solid var(--border);
+}
+
+.catProductTrack {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.8rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.catProductCard {
+  animation: fadeInUp 0.5s ease-out both;
+  min-width: 0;
+}
+
+/* ===== PRODUCTS (fallback loading) ===== */
 .productSection {
   background: var(--bg-secondary);
 }
@@ -410,6 +432,7 @@
 @media (max-width: 1024px) {
   .trustGrid { grid-template-columns: repeat(2, 1fr); }
   .categoryGrid { grid-template-columns: repeat(3, 1fr); }
+  .catProductTrack { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -423,6 +446,26 @@
   .catIcon { font-size: 1.5rem; }
   .catLabel { font-size: 0.72rem; }
   .productGrid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+
+  /* Category product sections: horizontal scroll on mobile */
+  .catProductTrack {
+    display: flex;
+    gap: 0.6rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+  }
+  .catProductTrack::-webkit-scrollbar { height: 4px; }
+  .catProductTrack::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+  .catProductCard {
+    flex: 0 0 55%;
+    scroll-snap-align: start;
+    animation: none;
+    min-width: 200px;
+  }
+
   .trustGrid { grid-template-columns: 1fr; gap: 1rem; }
   .trustItem { gap: 0.6rem; }
   .trustIcon { width: 40px; height: 40px; font-size: 1.5rem; }
@@ -448,6 +491,7 @@
   .catIcon { font-size: 1.3rem; }
   .catLabel { font-size: 0.65rem; }
   .productGrid { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+  .catProductCard { flex: 0 0 70%; min-width: 160px; }
   .ctaBox { padding: 2rem 1rem; }
   .ctaTitle { font-size: 1.4rem; }
   .section { padding: 2rem 0; }
