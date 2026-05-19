@@ -5,17 +5,6 @@ import { useTranslations, useLocale } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
 import styles from './products.module.css';
 
-const ICONS: Record<string, string> = {
-  rings: '💍', necklaces: '📿', bracelets: '✨', earrings: '🌟',
-  pendants: '🔮', sets: '👑', kolye: '📿', bilezik: '✨',
-  yüzük: '💍', küpe: '🌟', default: '✦'
-};
-
-function getIcon(name: string) {
-  const k = name?.toLowerCase();
-  return ICONS[k] || ICONS.default;
-}
-
 import { Suspense } from 'react';
 
 function ProductsContent() {
@@ -150,7 +139,7 @@ function ProductsContent() {
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.pageTitle}>
-            {activeCategory ? `${getIcon(activeCategory)} ${getCategoryLabel(activeCategory)}` : `✦ ${t('allProducts')}`}
+            {activeCategory ? getCategoryLabel(activeCategory) : `✦ ${t('allProducts')}`}
           </h1>
           <span className={styles.pageCount}>{t('showingResults', { count: total })}</span>
         </div>
@@ -219,7 +208,7 @@ function ProductsContent() {
                       className={`${styles.catItem} ${activeCategory === cat.slug ? styles.catActive : ''}`}
                       onClick={() => handleCategory(cat.slug)}
                     >
-                      <span>{getIcon(cat.slug)} {cat.name}</span>
+                      <span>{cat.name}</span>
                       <span className={styles.catCount}>{cat.count}</span>
                     </button>
                   </li>
