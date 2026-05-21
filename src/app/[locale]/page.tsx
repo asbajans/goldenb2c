@@ -6,6 +6,13 @@ import { Link } from '@/i18n/routing';
 import ProductCard from '@/components/ProductCard';
 import styles from './page.module.css';
 
+function getYouTubeId(url: string): string | null {
+  if (!url) return null;
+  const reg = /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const m = url.match(reg);
+  return m ? m[1] : null;
+}
+
 const TRUST_ITEMS = [
   { icon: '🔒', key: 'securePayments' },
   { icon: '🌍', key: 'globalShipping' },
@@ -21,6 +28,45 @@ export default function Home() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const locale = useLocale();
+
+  const [sliders, setSliders] = useState<any[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+
+  // Fetch settings (sliders, featured products)
+  useEffect(() => {
+    fetch(`/api/settings`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.homepage_sliders) {
+          try {
+            const items = JSON.parse(data.homepage_sliders);
+            setSliders(items.filter((s: any) => s.imageUrl || s.videoUrl));
+          } catch { }
+        }
+        if (data.homepage_featured_products) {
+          try {
+            const ids = JSON.parse(data.homepage_featured_products);
+            if (Array.isArray(ids) && ids.length > 0) {
+              fetch(`/api/products?ids=${ids.join(',')}&lang=${locale}`)
+                .then(r => r.json())
+                .then(d => { if (Array.isArray(d?.data)) setFeaturedProducts(d.data); })
+                .catch(() => {});
+            }
+          } catch { }
+        }
+      })
+      .catch(() => {});
+  }, [locale]);
+
+  // Auto-slide
+  useEffect(() => {
+    if (sliders.length < 2) return;
+    const timer = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % sliders.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [sliders.length]);
 
   // Fetch categories, then fetch 6 newest products per category
   useEffect(() => {
@@ -90,6 +136,92 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ===== SLIDER ===== */}
+      {sliders.length > 0 && (
+        <section className={styles.sliderSection}>
+          <div className={styles.sliderContainer}>
+            {sliders.map((slide, idx) => {
+              const vid = slide.videoUrl ? getYouTubeId(slide.videoUrl) : null;
+              const isActive = idx === activeSlide;
+              return (
+                <div
+                  key={slide.id || idx}
+                  className={`${styles.slide} ${isActive ? styles.slideActive : ''}`}
+                >
+                  {vid ? (
+                    <div className={styles.slideVideoWrap}>
+                      <iframe
+                        src={`https://www.youtube.com/embed/${vid}?autoplay=${isActive ? 1 : 0}&mute=1&loop=1&playlist=${vid}&controls=0&modestbranding=1`}
+                        className={styles.slideVideo}
+                        allow="autoplay; encrypted-media"
+                        allowFullScreen
+                      />
+                      <div className={styles.slideOverlay} />
+                    </div>
+                  ) : slide.imageUrl ? (
+                    <img src={slide.imageUrl} alt={slide.translations?.[locale]?.title || ''} className={styles.slideImage} />
+                  ) : null}
+                  <div className={styles.slideContent}>
+                    <h2 className={styles.slideTitle}>{slide.translations?.[locale]?.title || ''}</h2>
+                    {slide.translations?.[locale]?.subtitle && (
+                      <p className={styles.slideSubtitle}>{slide.translations?.[locale]?.subtitle}</p>
+                    )}
+                    {slide.link && (
+                      <Link href={slide.link} className={styles.slideBtn}>
+                        {tc('viewAll')} ✦
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {sliders.length > 1 && (
+              <div className={styles.sliderDots}>
+                {sliders.map((_, idx) => (
+                  <button
+                    key={idx}
+                    className={`${styles.sliderDot} ${idx === activeSlide ? styles.sliderDotActive : ''}`}
+                    onClick={() => setActiveSlide(idx)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ===== FEATURED PRODUCTS ===== */}
+      {featuredProducts.length > 0 && (
+        <section className={`${styles.section} ${styles.productSection}`}>
+          <div className="container">
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>{t('featuredPieces')}</h2>
+              <Link href="/products" className={styles.seeAll}>{tc('viewAll')} →</Link>
+            </div>
+            <div className={styles.productGrid}>
+              {featuredProducts.map((product, i) => {
+                const imageUrl = product.images?.[0];
+                const isValidImage = imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('http');
+                return (
+                  <div key={product.id} className={styles.productItem} style={{ animationDelay: `${i * 0.05}s` }}>
+                    <ProductCard
+                      id={product.id}
+                      title={product.title}
+                      price={product.priceTRY ? `₺${Number(product.priceTRY).toLocaleString('tr-TR')}` : '—'}
+                      priceUSD={product.priceUSD ? `$${Number(product.priceUSD).toFixed(0)}` : undefined}
+                      storeName={product.store?.storeName || 'Golden Store'}
+                      imageUrl={isValidImage ? imageUrl : ''}
+                      slug={product.slug}
+                      category={product.category}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ===== CATEGORY PRODUCTS ===== */}
       {!loading && categories.length > 0 && categories.map((cat, catIdx) => {
