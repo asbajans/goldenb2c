@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import ProductCard from '@/components/ProductCard';
@@ -11,21 +11,6 @@ function getYouTubeId(url: string): string | null {
   const reg = /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   const m = url.match(reg);
   return m ? m[1] : null;
-}
-
-declare global {
-  interface Window { YT?: any; onYouTubeIframeAPIReady?: () => void; }
-}
-
-let apiLoaded = false;
-function loadYouTubeAPI() {
-  if (apiLoaded || window.YT) { apiLoaded = true; return Promise.resolve(); }
-  return new Promise<void>(resolve => {
-    window.onYouTubeIframeAPIReady = () => { apiLoaded = true; resolve(); };
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(tag);
-  });
 }
 
 const TRUST_ITEMS = [
@@ -47,8 +32,6 @@ export default function Home() {
   const [sliders, setSliders] = useState<any[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
-  const playersRef = useRef<Map<string, any>>(new Map());
-  const playerContainersRef = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Fetch settings (sliders, featured products)
   useEffect(() => {
@@ -75,61 +58,6 @@ export default function Home() {
       })
       .catch(() => {});
   }, [locale]);
-
-  // Load YouTube API on mount
-  useEffect(() => { loadYouTubeAPI(); }, []);
-
-  // Create/destroy YouTube players when active slide changes
-  useEffect(() => {
-    if (sliders.length === 0) return;
-    const current = sliders[activeSlide];
-    const vid = current?.videoUrl ? getYouTubeId(current.videoUrl) : null;
-
-    // Destroy all non-active players
-    playersRef.current.forEach((player, key) => {
-      if (key !== vid) {
-        player.destroy();
-        playersRef.current.delete(key);
-      }
-    });
-
-    if (!vid) return;
-    if (playersRef.current.has(vid)) {
-      playersRef.current.get(vid).playVideo();
-      return;
-    }
-
-    const container = playerContainersRef.current.get(vid);
-    if (!container || !window.YT) return;
-
-    const player = new window.YT.Player(container, {
-      videoId: vid,
-      height: '100%',
-      width: '100%',
-      playerVars: {
-        autoplay: 1,
-        mute: 1,
-        loop: 1,
-        playlist: vid,
-        controls: 0,
-        modestbranding: 1,
-        rel: 0,
-        showinfo: 0,
-        iv_load_policy: 3,
-        disablekb: 1,
-        fs: 0,
-        playsinline: 1,
-      },
-      events: {
-        onStateChange: (e: any) => {
-          if (e.data === window.YT.PlayerState.ENDED) {
-            player.playVideo();
-          }
-        },
-      },
-    });
-    playersRef.current.set(vid, player);
-  }, [activeSlide, sliders]);
 
   // Auto-slide
   useEffect(() => {
@@ -191,11 +119,13 @@ export default function Home() {
                 >
                   {vid ? (
                     <div className={styles.slideVideoWrap}>
-                      <div
-                        ref={el => { if (el) playerContainersRef.current.set(vid, el); }}
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${vid}?autoplay=${isActive ? 1 : 0}&mute=1&loop=1&playlist=${vid}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1`}
                         className={styles.slideVideo}
-                        id={`yt-player-${vid}`}
+                        allow="autoplay; encrypted-media"
+                        title=""
                       />
+                      <div className={styles.slideClickGuard} />
                       <div className={styles.slideOverlay} />
                     </div>
                   ) : slide.imageUrl ? (
