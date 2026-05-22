@@ -105,40 +105,8 @@ export default function Home() {
   return (
     <main className={styles.main}>
 
-      {/* ===== HERO ===== */}
-      <section className={styles.hero}>
-        <div className={styles.heroBg}>
-          <div className={styles.heroOrb1} />
-          <div className={styles.heroOrb2} />
-        </div>
-        <div className={styles.heroContent}>
-          <span className={styles.heroPill}>✦ &nbsp;Premium Jewelry Marketplace</span>
-          <h1 className={styles.heroTitle}>
-            {t('heroTitle')}<br />
-            <span className={styles.heroGold}>{t('heroTitleGold')}</span>
-          </h1>
-          <p className={styles.heroSub}>
-            {t('heroSubtitle')}
-          </p>
-          <div className={styles.heroActions}>
-            <Link href="/products" className={styles.btnPrimary} id="hero-shop-now">{t('shopNow')} ✦</Link>
-            <Link href="/sellers" className={styles.btnSecondary} id="hero-see-sellers">{t('meetSellers')}</Link>
-          </div>
-          <div className={styles.heroStats}>
-            <div className={styles.stat}>
-              <strong>{total > 0 ? `${total}+` : '—'}</strong>
-              <span>{t('products')}</span>
-            </div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>150+</strong><span>{t('verifiedSellers')}</span></div>
-            <div className={styles.statDivider} />
-            <div className={styles.stat}><strong>4</strong><span>{t('languages')}</span></div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== SLIDER ===== */}
-      {sliders.length > 0 && (
+      {/* ===== HERO / SLIDER ===== */}
+      {sliders.length > 0 ? (
         <section className={styles.sliderSection}>
           <div className={styles.sliderContainer}>
             {sliders.map((slide, idx) => {
@@ -187,6 +155,37 @@ export default function Home() {
                 ))}
               </div>
             )}
+          </div>
+        </section>
+      ) : (
+        <section className={styles.hero}>
+          <div className={styles.heroBg}>
+            <div className={styles.heroOrb1} />
+            <div className={styles.heroOrb2} />
+          </div>
+          <div className={styles.heroContent}>
+            <span className={styles.heroPill}>✦ &nbsp;Premium Jewelry Marketplace</span>
+            <h1 className={styles.heroTitle}>
+              {t('heroTitle')}<br />
+              <span className={styles.heroGold}>{t('heroTitleGold')}</span>
+            </h1>
+            <p className={styles.heroSub}>
+              {t('heroSubtitle')}
+            </p>
+            <div className={styles.heroActions}>
+              <Link href="/products" className={styles.btnPrimary} id="hero-shop-now">{t('shopNow')} ✦</Link>
+              <Link href="/sellers" className={styles.btnSecondary} id="hero-see-sellers">{t('meetSellers')}</Link>
+            </div>
+            <div className={styles.heroStats}>
+              <div className={styles.stat}>
+                <strong>{total > 0 ? `${total}+` : '—'}</strong>
+                <span>{t('products')}</span>
+              </div>
+              <div className={styles.statDivider} />
+              <div className={styles.stat}><strong>150+</strong><span>{t('verifiedSellers')}</span></div>
+              <div className={styles.statDivider} />
+              <div className={styles.stat}><strong>4</strong><span>{t('languages')}</span></div>
+            </div>
           </div>
         </section>
       )}
