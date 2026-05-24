@@ -1,0 +1,42 @@
+# Golden Crafters
+> https://goldencrafters.com
+
+Golden Crafters, yapay zeka destekli çok dilli bir B2C kuyumcu pazar yeridir. Müşterilere gerçek zamanlı altın fiyatlarıyla güvenilir kuyumculardan ürün satın alma imkanı sunar.
+
+## Diller
+- 🇬🇧 İngilizce (en) — https://goldencrafters.com/en
+- 🇹🇷 Türkçe (tr) — https://goldencrafters.com/tr
+- 🇮🇹 İtalyanca (it) — https://goldencrafters.com/it
+- 🇸🇦 Arapça (ar) — https://goldencrafters.com/ar (RTL)
+- 🇪🇸 İspanyolca (es) — https://goldencrafters.com/es
+
+## Önemli Sayfalar
+
+- Ana Sayfa: https://goldencrafters.com/{locale}
+- Ürünler: https://goldencrafters.com/{locale}/products
+- Kategoriler: https://goldencrafters.com/{locale}/categories
+- Mağaza Rehberi: https://goldencrafters.com/{locale}/sellers
+- Hakkımızda: https://goldencrafters.com/{locale}/about
+- Blog: https://goldencrafters.com/{locale}/blog
+- Gizlilik Politikası: https://goldencrafters.com/{locale}/privacy
+- Kullanım Koşulları: https://goldencrafters.com/{locale}/terms
+
+## Site Özellikleri
+- **Dinamik Altın Fiyatlandırması**: Ürün fiyatları canlı altın kuru ile güncellenir
+- **Çoklu Dil Desteği**: 5 dil (en, tr, it, ar, es), Arapça RTL desteği
+- **Çoklu Para Birimi**: Her dil için yerel para birimi
+- **Güvenli Ödeme**: Kredi kartı ve havale/EFT seçenekleri
+- **Kullanıcı Hesapları**: Sipariş takibi, adres yönetimi, favori listeleri
+- **Canlı Destek**: Müşteri hizmetleri ile iletişim
+- **SEO Optimizasyonu**: JSON-LD schema.org markup ile zenginleştirilmiş ürün sayfaları
+- **Hızlı Teslimat**: Türkiye genelinde ve uluslararası kargo
+- **Mobil Uyumlu**: Responsive tasarım
+- **Pazaryeri Modeli**: Birden fazla kuyumcu mağazası tek platformda
+
+## API
+Golden Crafters bir frontend uygulamasıdır. Tüm API istekleri backend proxy üzerinden yapılır. Public API endpoint'leri aşağıdaki gibidir:
+
+- Ürünler: https://goldencrafters.com/api/products
+- Kategoriler: https://goldencrafters.com/api/categories
+- Mağazalar: https://goldencrafters.com/api/stores
+- Site Ayarları: https://goldencrafters.com/api/settings
