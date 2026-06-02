@@ -101,7 +101,7 @@ export default function Footer() {
 
       <div className={styles.bottom}>
         <div className={styles.container}>
-          <p className={styles.copy}>© {new Date().getFullYear()} Golden Crafters Marketplace. {t('allRightsReserved')}</p>
+          <p className={styles.copy}>© {new Date().getFullYear()} Golden Crafters . {t('allRightsReserved')}</p>
           <div className={styles.badges}>
             <span className={styles.badge}>🔒 {t('securePayment')}</span>
             <span className={styles.badge}>✦ {t('authenticated')}</span>

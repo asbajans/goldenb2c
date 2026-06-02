@@ -13,11 +13,11 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-playfair', weight: ['400', '700'] });
 
 export const metadata: Metadata = {
-  title: "Golden Crafters Marketplace",
-  description: "AI-powered B2C marketplace for independent jewelry makers. Discover authentic gold pieces from verified sellers worldwide.",
+  title: "Golden Crafters ",
+  description: "Discover authentic gold pieces from verified sellers worldwide.",
   openGraph: {
-    title: "Golden Crafters Marketplace",
-    description: "AI-powered B2C marketplace for independent jewelry makers.",
+    title: "Golden Crafters",
+    description: "Discover authentic gold pieces from verified sellers worldwide.",
     type: "website",
   },
 };
