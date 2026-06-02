@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 's3.asb.web.tr' },
       { protocol: 'https', hostname: 'api.asb.web.tr' },
+      { protocol: 'https', hostname: 'pirlantakatalogu.com' },
+      { protocol: 'https', hostname: 'www.pirlantakatalogu.com' },
     ]
   }
 };
