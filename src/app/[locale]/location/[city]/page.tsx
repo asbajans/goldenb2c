@@ -94,7 +94,7 @@ export default function LocationPage() {
                 storeName={product.store?.storeName || 'Golden Store'}
                 imageUrl={product.images?.[0] || ''}
                 slug={product.slug}
-                category={product.category}
+                category={product._categoryName || product.category}
               />
             ))}
           </div>

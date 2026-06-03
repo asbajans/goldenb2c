@@ -280,7 +280,7 @@ function ProductsContent() {
                       storeName={p.store?.storeName || ''}
                       imageUrl={valid ? img : ''}
                       slug={p.slug}
-                      category={p.category}
+                      category={p._categoryName || p.category}
                       isNew={i < 3}
                     />
                   );

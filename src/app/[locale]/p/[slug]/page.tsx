@@ -144,7 +144,7 @@ export default function ProductDetailPage() {
         <a href={`/${locale}`}>Home</a>
         <span>→</span>
         <a href={`/${locale}/products`}>Products</a>
-        {product.category && <><span>→</span><a href={`/${locale}/categories?type=${encodeURIComponent(product.category)}`}>{product.category}</a></>}
+        {product.category && <><span>→</span><a href={`/${locale}/categories?type=${encodeURIComponent(product.category)}`}>{product._categoryName || product.category}</a></>}
         <span>→</span>
         <span>{product.title}</span>
       </div>
@@ -188,7 +188,7 @@ export default function ProductDetailPage() {
         <div className={styles.info}>
           {product.category && (
             <a href={`/${locale}/categories?type=${encodeURIComponent(product.category)}`} className={styles.catPill}>
-              {product.category}
+              {product._categoryName || product.category}
             </a>
           )}
           <h1 className={styles.title}>{product.title}</h1>

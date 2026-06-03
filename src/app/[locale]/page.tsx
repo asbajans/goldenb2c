@@ -213,7 +213,7 @@ export default function Home() {
                       storeName={product.store?.storeName || 'Golden Store'}
                       imageUrl={isValidImage ? imageUrl : ''}
                       slug={product.slug}
-                      category={product.category}
+                      category={product._categoryName || product.category}
                     />
                   </div>
                 );
@@ -250,7 +250,7 @@ export default function Home() {
                         storeName={product.store?.storeName || 'Golden Store'}
                         imageUrl={isValidImage ? imageUrl : ''}
                         slug={product.slug}
-                        category={product.category}
+                        category={product._categoryName || product.category}
                         isNew={i < 2}
                       />
                     </div>
