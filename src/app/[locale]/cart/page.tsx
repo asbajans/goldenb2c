@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { proxiedImage } from '@/utils/image';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/context/CartContext';
 import styles from './cart.module.css';
@@ -42,7 +43,7 @@ export default function CartPage() {
             <div key={item.id} className={styles.item}>
               <div className={styles.itemImage}>
                 {item.image ? (
-                  <Image src={item.image} alt={item.title} fill sizes="120px" style={{ objectFit: 'cover' }} />
+                  <Image src={proxiedImage(item.image)} alt={item.title} fill sizes="120px" style={{ objectFit: 'cover' }} />
                 ) : (
                   <div className={styles.placeholder}>✦</div>
                 )}

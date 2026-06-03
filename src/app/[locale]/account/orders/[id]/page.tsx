@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { proxiedImage } from '@/utils/image';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import styles from './orderDetail.module.css';
@@ -105,7 +106,7 @@ export default function OrderDetailPage() {
             <div key={item.id} className={styles.item}>
               <div className={styles.itemImage}>
                 {item.image ? (
-                  <Image src={item.image} alt={item.title} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                  <Image src={proxiedImage(item.image)} alt={item.title} fill sizes="80px" style={{ objectFit: 'cover' }} />
                 ) : (
                   <div className={styles.placeholder}>✦</div>
                 )}

@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'api.asb.web.tr' },
       { protocol: 'https', hostname: 'pirlantakatalogu.com' },
       { protocol: 'https', hostname: 'www.pirlantakatalogu.com' },
+      { protocol: 'http', hostname: 'localhost' },
     ]
   }
 };
