@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { proxiedImage } from '@/utils/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import styles from './wishlist.module.css';
@@ -94,7 +93,7 @@ export default function WishlistPage() {
             <div key={item.id} className={styles.card}>
               <Link href={`/p/${item.productId}`} className={styles.imageWrap}>
                 {item.image ? (
-                  <Image src={proxiedImage(item.image)} alt={item.title} fill sizes="240px" style={{ objectFit: 'cover' }} />
+                  <Image src={item.image} alt={item.title} fill sizes="240px" style={{ objectFit: 'cover' }} />
                 ) : (
                   <div className={styles.placeholder}>✦</div>
                 )}

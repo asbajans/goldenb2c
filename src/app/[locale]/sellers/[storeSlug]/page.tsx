@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { proxiedImage } from '@/utils/image';
 import Link from 'next/link';
 import styles from './store.module.css';
 
@@ -51,7 +50,7 @@ export default function StoreDetailPage() {
       <div className={styles.hero}>
         <div className={styles.heroBanner}>
           {store.banner && store.banner.startsWith('http') ? (
-            <Image src={proxiedImage(store.banner)} alt={store.storeName} fill style={{ objectFit: 'cover' }} sizes="100vw" priority />
+            <Image src={store.banner} alt={store.storeName} fill style={{ objectFit: 'cover' }} sizes="100vw" priority />
           ) : (
             <div className={styles.bannerPlaceholder}>
               <span>✦</span>
@@ -62,7 +61,7 @@ export default function StoreDetailPage() {
         <div className={styles.heroContent}>
           <div className={styles.logoWrap}>
             {store.logo && store.logo.startsWith('http') ? (
-              <Image src={proxiedImage(store.logo)} alt={store.storeName} width={88} height={88} className={styles.storeLogo} />
+              <Image src={store.logo} alt={store.storeName} width={88} height={88} className={styles.storeLogo} />
             ) : (
               <div className={styles.logoPlaceholder}>{store.storeName?.[0] || '✦'}</div>
             )}
@@ -105,7 +104,7 @@ export default function StoreDetailPage() {
                   <div className={styles.cardImage}>
                     {Array.isArray(product.images) && product.images[0] ? (
                       <Image
-                        src={proxiedImage(product.images[0])}
+                        src={product.images[0]}
                         alt={product.title}
                         fill
                         sizes="(max-width: 768px) 50vw, 25vw"

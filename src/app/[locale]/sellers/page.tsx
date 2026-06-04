@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { proxiedImage } from '@/utils/image';
 import { useTranslations } from 'next-intl';
 import styles from './sellers.module.css';
 
@@ -11,7 +10,7 @@ function StoreCard({ store, t }: { store: any; t: any }) {
       {/* Banner */}
       <div className={styles.banner}>
         {store.banner && store.banner.startsWith('http') ? (
-          <Image src={proxiedImage(store.banner)} alt={store.storeName} fill style={{ objectFit: 'cover' }} sizes="400px" />
+          <Image src={store.banner} alt={store.storeName} fill style={{ objectFit: 'cover' }} sizes="400px" />
         ) : (
           <div className={styles.bannerPlaceholder}>
             <span>✦</span>
@@ -20,7 +19,7 @@ function StoreCard({ store, t }: { store: any; t: any }) {
         {/* Logo */}
         <div className={styles.logoWrap}>
           {store.logo && store.logo.startsWith('http') ? (
-            <Image src={proxiedImage(store.logo)} alt={store.storeName} width={56} height={56} className={styles.logo} />
+            <Image src={store.logo} alt={store.storeName} width={56} height={56} className={styles.logo} />
           ) : (
             <div className={styles.logoPlaceholder}>{store.storeName?.[0] || '✦'}</div>
           )}

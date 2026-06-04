@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale } from 'next-intl';
-import { proxiedImage } from '@/utils/image';
 import styles from './ProductCard.module.css';
 
 export interface ProductCardProps {
@@ -27,7 +26,7 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
       <div className={styles.imageContainer}>
         {hasImage ? (
           <Image
-            src={proxiedImage(imageUrl)}
+            src={imageUrl}
             alt={title}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"

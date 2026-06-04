@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { proxiedImage } from '@/utils/image';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import styles from './product.module.css';
@@ -156,7 +155,7 @@ export default function ProductDetailPage() {
           <div className={styles.mainImage}>
             {images[activeImage] ? (
               <Image
-                src={proxiedImage(images[activeImage])}
+                src={images[activeImage]}
                 alt={product.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -178,7 +177,7 @@ export default function ProductDetailPage() {
                   className={`${styles.thumb} ${i === activeImage ? styles.thumbActive : ''}`}
                   onClick={() => setActiveImage(i)}
                 >
-                  <Image src={proxiedImage(img)} alt={`${product.title} ${i + 1}`} fill style={{ objectFit: 'cover' }} sizes="80px" />
+                  <Image src={img} alt={`${product.title} ${i + 1}`} fill style={{ objectFit: 'cover' }} sizes="80px" />
                 </button>
               ))}
             </div>
@@ -198,7 +197,7 @@ export default function ProductDetailPage() {
           {product.store && (
             <a href={`/sellers/${product.store.storeSlug}`} className={styles.storeBadge}>
               {product.store.logo && (
-                <Image src={proxiedImage(product.store.logo)} alt={product.store.storeName} width={28} height={28} className={styles.storeLogo} />
+                <Image src={product.store.logo} alt={product.store.storeName} width={28} height={28} className={styles.storeLogo} />
               )}
               <span>by <strong>{product.store.storeName}</strong></span>
               {product.store.rating > 0 && (

@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr').replace(/\/api$/, '');
 
 export function proxiedImage(url: string | null | undefined): string {
   if (!url) return '/placeholder.jpg';
