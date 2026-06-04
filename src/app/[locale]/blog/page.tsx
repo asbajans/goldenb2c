@@ -58,7 +58,7 @@ export default function BlogPage() {
                 .map(post => {
                   const tr = post.translations?.[locale] || post.translations?.en || {};
                   return (
-                    <article key={post.id} className={styles.card}>
+                    <Link key={post.id} href={`/${locale}/blog/${post.id}`} className={styles.card} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
                       {post.imageUrl && (
                         <img src={post.imageUrl} alt={tr.title || ''} className={styles.cardImage} />
                       )}
@@ -67,7 +67,7 @@ export default function BlogPage() {
                         {tr.excerpt && <p className={styles.cardExcerpt}>{tr.excerpt}</p>}
                         {tr.content && <div className={styles.cardContent}>{tr.content}</div>}
                       </div>
-                    </article>
+                    </Link>
                   );
                 })}
             </div>

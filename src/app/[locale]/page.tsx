@@ -320,7 +320,7 @@ export default function Home() {
             {blogPosts.slice(0, 4).map((post) => {
               const tr = post.translations?.[locale] || post.translations?.en || {};
               return (
-                <Link key={post.id} href="/blog" className={styles.blogCard}>
+                <Link key={post.id} href={`/blog/${post.id}`} className={styles.blogCard}>
                   <div className={styles.blogImageWrap}>
                     {post.imageUrl ? (
                       <img src={post.imageUrl} alt={tr.title || ''} className={styles.blogImage} />
