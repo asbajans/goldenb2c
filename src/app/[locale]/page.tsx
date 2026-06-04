@@ -302,14 +302,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== SELLER CTA ===== */}
-      <section className={styles.ctaSection}>
+      {/* ===== BLOG ===== */}
+      <section className={styles.blogSection}>
         <div className="container">
-          <div className={styles.ctaBox}>
-            <div className={styles.ctaOrb} />
-            <h2 className={styles.ctaTitle}>{t('sellOnGolden')}</h2>
-            <p className={styles.ctaSub}>{t('sellOnGoldenSub')}</p>
-            <Link href="/sellers/join" className={styles.ctaBtn} id="cta-become-seller">{t('startSelling')} ✦</Link>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>{t('latestArticles')}</h2>
+            <Link href="/blog" className={styles.seeAll}>{tc('viewAll')} →</Link>
+          </div>
+          <div className={styles.blogGrid}>
+            {[
+              {
+                image: '/images/blog-gold-trends.jpg',
+                title: 'Gold Market Trends in 2026',
+                excerpt: 'Discover the latest gold price movements, investment insights, and what drives the global gold market this year.',
+              },
+              {
+                image: '/images/blog-jewelry-care.jpg',
+                title: 'Jewelry Care & Maintenance',
+                excerpt: 'Keep your precious pieces shining for generations with our expert jewelry care and storage tips.',
+              },
+              {
+                image: '/images/blog-gift-guide.jpg',
+                title: 'Choosing the Perfect Gold Gift',
+                excerpt: 'From anniversaries to engagements — find the ideal gold jewelry piece for every special occasion.',
+              },
+              {
+                image: '/images/blog-ai-seller.jpg',
+                title: 'Selling Smarter with AI',
+                excerpt: 'Learn how sellers are using AI-powered translation and content generation to reach global buyers.',
+              },
+            ].map((post, i) => (
+              <Link key={i} href="/blog" className={styles.blogCard}>
+                <div className={styles.blogImageWrap}>
+                  <div className={styles.blogImagePlaceholder}>
+                    <span>{['📈', '💍', '🎁', '🤖'][i]}</span>
+                  </div>
+                </div>
+                <div className={styles.blogBody}>
+                  <h3 className={styles.blogTitle}>{post.title}</h3>
+                  <p className={styles.blogExcerpt}>{post.excerpt}</p>
+                  <span className={styles.blogLink}>Read More →</span>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
