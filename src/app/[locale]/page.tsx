@@ -32,6 +32,7 @@ export default function Home() {
   const [sliders, setSliders] = useState<any[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
 
   // Fetch settings (sliders, featured products)
   useEffect(() => {
@@ -53,6 +54,12 @@ export default function Home() {
                 .then(d => { if (Array.isArray(d?.data)) setFeaturedProducts(d.data); })
                 .catch(() => {});
             }
+          } catch { }
+        }
+        if (data.blog_posts) {
+          try {
+            const items = JSON.parse(data.blog_posts);
+            setBlogPosts(items.filter((p: any) => p.isActive !== false));
           } catch { }
         }
       })
@@ -310,41 +317,27 @@ export default function Home() {
             <Link href="/blog" className={styles.seeAll}>{tc('viewAll')} →</Link>
           </div>
           <div className={styles.blogGrid}>
-            {[
-              {
-                image: '/images/blog-gold-trends.jpg',
-                title: 'Gold Market Trends in 2026',
-                excerpt: 'Discover the latest gold price movements, investment insights, and what drives the global gold market this year.',
-              },
-              {
-                image: '/images/blog-jewelry-care.jpg',
-                title: 'Jewelry Care & Maintenance',
-                excerpt: 'Keep your precious pieces shining for generations with our expert jewelry care and storage tips.',
-              },
-              {
-                image: '/images/blog-gift-guide.jpg',
-                title: 'Choosing the Perfect Gold Gift',
-                excerpt: 'From anniversaries to engagements — find the ideal gold jewelry piece for every special occasion.',
-              },
-              {
-                image: '/images/blog-ai-seller.jpg',
-                title: 'Selling Smarter with AI',
-                excerpt: 'Learn how sellers are using AI-powered translation and content generation to reach global buyers.',
-              },
-            ].map((post, i) => (
-              <Link key={i} href="/blog" className={styles.blogCard}>
-                <div className={styles.blogImageWrap}>
-                  <div className={styles.blogImagePlaceholder}>
-                    <span>{['📈', '💍', '🎁', '🤖'][i]}</span>
+            {blogPosts.slice(0, 4).map((post) => {
+              const tr = post.translations?.[locale] || post.translations?.en || {};
+              return (
+                <Link key={post.id} href="/blog" className={styles.blogCard}>
+                  <div className={styles.blogImageWrap}>
+                    {post.imageUrl ? (
+                      <img src={post.imageUrl} alt={tr.title || ''} className={styles.blogImage} />
+                    ) : (
+                      <div className={styles.blogImagePlaceholder}>
+                        <span>📝</span>
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className={styles.blogBody}>
-                  <h3 className={styles.blogTitle}>{post.title}</h3>
-                  <p className={styles.blogExcerpt}>{post.excerpt}</p>
-                  <span className={styles.blogLink}>Read More →</span>
-                </div>
-              </Link>
-            ))}
+                  <div className={styles.blogBody}>
+                    <h3 className={styles.blogTitle}>{tr.title || ''}</h3>
+                    {tr.excerpt && <p className={styles.blogExcerpt}>{tr.excerpt}</p>}
+                    <span className={styles.blogLink}>Read More →</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

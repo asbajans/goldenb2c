@@ -621,6 +621,12 @@
   font-size: 2.5rem;
 }
 
+.blogImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .blogBody {
   padding: 1rem 1.2rem 1.2rem;
   display: flex;
