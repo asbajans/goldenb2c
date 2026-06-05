@@ -10,8 +10,7 @@ import { Suspense } from 'react';
 function ProductsContent() {
   const t = useTranslations('Products');
   const tc = useTranslations('Common');
-  const tCat = useTranslations('Categories');
-  
+
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('type') || '';
 
@@ -126,12 +125,9 @@ function ProductsContent() {
   const totalPages = Math.ceil(total / limit);
   const hasFilters = activeCategory || search || minPrice || maxPrice;
 
-  const getCategoryLabel = (name: string) => {
-    const slugMap: Record<string, string> = {
-      rings: 'rings', necklaces: 'necklaces', bracelets: 'bracelets',
-      earrings: 'earrings', pendants: 'pendants', sets: 'sets'
-    };
-    return tCat(slugMap[name] || name);
+  const getCategoryLabel = (slug: string) => {
+    const cat = categories.find(c => c.slug === slug);
+    return cat?.name || slug;
   };
 
   return (

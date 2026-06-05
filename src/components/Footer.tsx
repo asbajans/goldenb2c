@@ -8,7 +8,6 @@ import styles from './Footer.module.css';
 
 export default function Footer() {
   const t = useTranslations('Footer');
-  const tCat = useTranslations('Categories');
   const tc = useTranslations('Common');
   const locale = useLocale();
   const [categories, setCategories] = useState<any[]>([]);
