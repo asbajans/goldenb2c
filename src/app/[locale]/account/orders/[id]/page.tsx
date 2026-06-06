@@ -63,6 +63,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [cancelling, setCancelling] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -119,6 +120,28 @@ export default function OrderDetailPage() {
     }
   };
 
+  const handlePay = async () => {
+    if (!order) return;
+    setPaying(true);
+    try {
+      const token = localStorage.getItem('gc_token');
+      const res = await fetch(`/api/orders/customer/${order.id}/pay`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert(data.error || 'Failed to create payment');
+      }
+    } catch (err) {
+      alert('Failed to create payment');
+    } finally {
+      setPaying(false);
+    }
+  };
+
   const statusIdx = (s: string) => statusFlow.indexOf(s as typeof statusFlow[number]);
 
   if (authLoading || loading) {
@@ -131,6 +154,7 @@ export default function OrderDetailPage() {
 
   const currentStatusIdx = statusIdx(order.status);
   const isCancelled = order.status === 'cancelled' || order.status === 'returned';
+  const isStripe = getPaymentMethod(order.customerNote) === 'Credit Card (Stripe)';
 
   return (
     <div className={styles.page}>
@@ -266,6 +290,17 @@ export default function OrderDetailPage() {
           {(order.status === 'pending' || order.status === 'confirmed') && (
             <div className={styles.card}>
               <h2>Actions</h2>
+
+              {isStripe && order.status === 'pending' && (
+                <button
+                  className={styles.payBtn}
+                  onClick={handlePay}
+                  disabled={paying}
+                >
+                  {paying ? 'Redirecting...' : 'Pay Now 💳'}
+                </button>
+              )}
+
               <button
                 className={styles.cancelBtn}
                 onClick={handleCancel}

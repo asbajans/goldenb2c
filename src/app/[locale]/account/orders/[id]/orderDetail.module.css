@@ -238,6 +238,30 @@
 }
 
 /* Actions */
+.payBtn {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: var(--gold-gradient);
+  border: none;
+  color: #1a0f00;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 0.6rem;
+}
+
+.payBtn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.payBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .cancelBtn {
   width: 100%;
   padding: 0.7rem 1rem;
