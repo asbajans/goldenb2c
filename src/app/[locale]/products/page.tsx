@@ -278,6 +278,8 @@ function ProductsContent() {
                       slug={p.slug}
                       category={p._categoryName || p.category}
                       isNew={i < 3}
+                      discountRate={p.discountRate}
+                      discountedPriceUSD={p.discountRate ? `$${Number(Number(p.priceUSD || 0) * (1 - p.discountRate / 100)).toFixed(0)}` : undefined}
                     />
                   );
                 })}

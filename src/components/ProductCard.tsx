@@ -14,12 +14,17 @@ export interface ProductCardProps {
   slug: string;
   category?: string;
   isNew?: boolean;
+  discountRate?: number;
+  discountedPrice?: string;
+  discountedPriceUSD?: string;
 }
 
-export default function ProductCard({ id, title, price, priceUSD, storeName, imageUrl, slug, category, isNew }: ProductCardProps) {
+export default function ProductCard({ id, title, price, priceUSD, storeName, imageUrl, slug, category, isNew, discountRate, discountedPriceUSD }: ProductCardProps) {
   const hasImage = imageUrl && imageUrl !== '/placeholder.jpg' && !imageUrl.startsWith('data:image');
-  
+
   const locale = useLocale();
+  const hasDiscount = discountRate && discountRate > 0 && discountedPriceUSD;
+  const displayPriceUSD = hasDiscount ? (discountedPriceUSD || priceUSD) : priceUSD;
 
   return (
     <Link href={`/${locale}/p/${slug}`} className={styles.card} id={`product-${id}`}>
@@ -40,6 +45,7 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
         )}
         <div className={styles.overlay} />
         <div className={styles.badges}>
+          {hasDiscount && <span className={styles.discountBadge}>-%{discountRate}</span>}
           {isNew && <span className={styles.badgeNew}>New</span>}
           {category && <span className={styles.badgeCat}>{category}</span>}
         </div>
@@ -54,9 +60,16 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
         </div>
         <h3 className={styles.title}>{title}</h3>
         <div className={styles.priceRow}>
-          <span className={styles.price}>{price}</span>
-          {priceUSD && <span className={styles.priceUSD}>{priceUSD}</span>}
+          {hasDiscount ? (
+            <>
+              <span className={styles.priceUSD}>{displayPriceUSD}</span>
+              <span className={styles.oldPriceUSD}>{priceUSD}</span>
+            </>
+          ) : (
+            <span className={styles.priceUSD}>{displayPriceUSD}</span>
+          )}
         </div>
+        <div className={styles.priceTRY}>{price}</div>
       </div>
     </Link>
   );

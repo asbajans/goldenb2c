@@ -82,6 +82,17 @@
   gap: 0.3rem;
 }
 
+.discountBadge {
+  display: inline-block;
+  padding: 0.18rem 0.6rem;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
 .badgeNew {
   display: inline-block;
   padding: 0.18rem 0.6rem;
@@ -166,9 +177,10 @@
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+  margin-bottom: 0.15rem;
 }
 
-.price {
+.priceUSD {
   font-size: 1.1rem;
   font-weight: 800;
   background: var(--gold-gradient);
@@ -177,8 +189,15 @@
   background-clip: text;
 }
 
-.priceUSD {
+.oldPriceUSD {
   font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.priceTRY {
+  font-size: 0.75rem;
   color: var(--text-muted);
   font-weight: 500;
 }

@@ -140,9 +140,73 @@ Guest sepet: localStorage tabanlı. Authenticated sepet: backend API üzerinden.
 7. **Coming Soon sayfaları kaldırıldı**: `[...slug]` catch-all artık 404 sayfası. About, Privacy Policy, Terms of Service sayfaları dolduruldu. Blog sayfası iyileştirildi.
 8. **Hata yönetimi**: `error.tsx` (Error Boundary) ve `not-found.tsx` eklendi. Tüm hatalar çevirilerle kullanıcıya gösteriliyor.
 
+## Product & Category Sistemi (KRİTİK)
+
+### Kategori Veri Akışı
+1. `pages/api/categories/route.ts` → backend'deki `/api/marketplace/categories`'e proxy yapar (`MarketplaceController.getCategories`)
+2. Backend, ürünleri `categoryId`'ye göre gruplar + legacy raw `category` alanına göre gruplar
+3. Aynı kategori hem `categoryId` hem raw `category`'den gelirse, **büyük olan count** kullanılır
+4. Kategori adları admin paneldeki `Category.translations` (JSONB) üzerinden backend tarafında çevrilir
+
+### `_categoryName` Kullanımı
+Backend'den gelen her ürün yanıtında `_categoryName` alanı bulunur. Bu alan:
+- `categoryRef` varsa (product.categoryId → Category tablosu): Admin paneldeki çeviriyi kullanır
+- Yoksa: `FALLBACK_CATEGORY_TRANSLATIONS` map'inden kategori ismini çözer
+
+Frontend'de `product._categoryName || product.category` şeklinde kullanılır.
+
+### Kategori Label Çözümleme (Frontend)
+`products/page.tsx`'deki `getCategoryLabel` fonksiyonu, backend'in `/api/categories`'den döndürdüğü `categories` dizisini kullanır:
+```typescript
+const getCategoryLabel = (slug: string) => {
+  const cat = categories.find(c => c.slug === slug);
+  return cat?.name || slug;
+};
+```
+Çeviriler backend'den geldiği için `useTranslations('Categories')` kullanılmaz.
+
+### Kategori Filtreleme (URL'den)
+`/products?type=slug` şeklinde çalışır. Backend'deki `getProducts` endpoint'i:
+- `slug` admin kategorisiyle eşleşirse → BOTH `categoryId` AND raw `category` alanında ara
+- Eşleşmezse → text-based ILIKE ara (tüm dil varyantlarıyla)
+
+---
+
+## Feed Sistemi (Proxy)
+
+Market frontend, feed endpoint'lerini backend'e proxy'ler:
+
+| Frontend Route | Backend Hedef | Açıklama |
+|----------------|---------------|----------|
+| `/api/feed/google.xml` | `api.asb.web.tr/api/feed/google.xml` | Google Shopping RSS XML |
+| `/api/feed/facebook.json` | `api.asb.web.tr/api/feed/facebook.json` | Facebook Catalog JSON |
+| `/api/feed/instagram.json` | `api.asb.web.tr/api/feed/instagram.json` | Instagram Catalog JSON |
+| `/api/feed/share/:slug` | `api.asb.web.tr/api/feed/share/:slug` | OG meta data |
+
+**Proxy dosyası:** `src/app/api/feed/[...slug]/route.ts` — catch-all route, tüm alt path'leri backend'e yönlendirir, Content-Type korunur.
+
+---
+
+## AI İçerik Yönetimi
+
+### Frontend'de AI Kullanımı
+AI özellikleri **satıcı panelinde** (seller.asb.web.tr) bulunur, market frontend'inde AI işlemi yoktur. Market sadece AI tarafından üretilmiş içerikleri **görüntüler**:
+
+- **Çeviriler:** `Product.translations` JSONB alanında saklanır. Backend `applyTranslation()` ile dile göre uygun başlık/açıklamayı seçer.
+- **`_categoryName`:** Admin panel kategorilerinin çevirileri backend tarafından eklenir.
+- **ProductCard / Ürün Detay:** `trans.title || json.title` ve `trans.description || json.description` şeklinde çeviriler kullanılır.
+
+### Desteklenen Diller
+`['en', 'tr', 'it', 'ar', 'es']` — AI çeviri ve feed'lerde kullanılan diller. Yeni dil eklerken:
+1. Backend: `aiService.ts` dil listesi
+2. Frontend: `routing.ts` locales dizisi
+3. Frontend: `messages/{lang}.json`
+
 ## AI Agent'lar İçin İpuçları
 - Kod yazmadan önce mevcut pattern'leri okuyun (benzer bir sayfa/route nasıl yazılmış)
 - `next-intl` API'si için `useTranslations()`, `Link`, `useRouter` kullanın (routing.ts'den import edin)
 - Yeni API route'u eklerken backend endpoint pattern'ini takip edin
 - CSS modülleri kullanın, global CSS'den kaçının
 - Test eklerken framework mevcut değil — Jest + React Testing Library kurulması önerilir
+- Kategori ile ilgili bir değişiklik yaparken: backend'in `getCategories` + `getProducts`'u, frontend'in `products/page.tsx`'deki `getCategoryLabel`'ı, ve `Footer`/`Header`'daki kategori linklerini birlikte düşünün
+- `useTranslations('Categories')` yerine backend'in döndürdüğü `cat.name`'i kullanın — çeviriler backend'den gelir

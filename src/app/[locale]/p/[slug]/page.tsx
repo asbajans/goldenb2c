@@ -94,6 +94,10 @@ export default function ProductDetailPage() {
   const images: string[] = Array.isArray(product.images) ? product.images : [];
   const price = selectedVariant?.priceTRY || product.priceTRY;
   const priceUSD = selectedVariant?.priceUSD || product.priceUSD;
+  const discountRate = Number(product.discountRate) || 0;
+  const hasDiscount = discountRate > 0 && Number(price) > 0;
+  const discountedPrice = hasDiscount ? Number(price) * (1 - discountRate / 100) : null;
+  const discountedPriceUSD = hasDiscount ? Number(priceUSD || 0) * (1 - discountRate / 100) : null;
   const variants: any[] = product.variants || [];
 
   // Group variant attributes for display
@@ -208,11 +212,27 @@ export default function ProductDetailPage() {
 
           {/* Price */}
           <div className={styles.priceBlock}>
-            {price && (
-              <div className={styles.priceMain}>₺{Number(price).toLocaleString('tr-TR')}</div>
-            )}
-            {priceUSD && (
-              <div className={styles.priceSub}>${Number(priceUSD).toFixed(2)} USD</div>
+            {hasDiscount ? (
+              <>
+                <div className={styles.priceMain}>
+                  ${Number(discountedPriceUSD).toFixed(2)} USD
+                </div>
+                <div className={styles.priceOld}>${Number(priceUSD).toFixed(2)} USD</div>
+                <div className={styles.priceDiscountBadge}>-%{discountRate} indirim</div>
+                <div className={styles.priceSub}>
+                  ≈ {Number(discountedPrice).toLocaleString('tr-TR')} ₺
+                  <span className={styles.priceOldTRY}> {Number(price).toLocaleString('tr-TR')} ₺</span>
+                </div>
+              </>
+            ) : (
+              <>
+                {priceUSD && (
+                  <div className={styles.priceMain}>${Number(priceUSD).toFixed(2)} USD</div>
+                )}
+                {price && (
+                  <div className={styles.priceSub}>≈ {Number(price).toLocaleString('tr-TR')} ₺</div>
+                )}
+              </>
             )}
           </div>
 

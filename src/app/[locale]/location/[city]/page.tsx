@@ -95,6 +95,8 @@ export default function LocationPage() {
                 imageUrl={product.images?.[0] || ''}
                 slug={product.slug}
                 category={product._categoryName || product.category}
+                discountRate={product.discountRate}
+                discountedPriceUSD={product.discountRate ? `$${Number(Number(product.priceUSD || 0) * (1 - product.discountRate / 100)).toFixed(0)}` : undefined}
               />
             ))}
           </div>
