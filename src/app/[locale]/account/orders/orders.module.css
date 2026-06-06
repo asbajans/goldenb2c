@@ -165,6 +165,31 @@
   font-weight: 700;
 }
 
+.products {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.productName {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.moreItems {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
 @media (max-width: 600px) {
   .page { padding: 1.5rem 1rem; }
   .header { flex-direction: column; gap: 1rem; align-items: flex-start; }

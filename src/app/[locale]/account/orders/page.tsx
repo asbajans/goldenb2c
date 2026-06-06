@@ -6,13 +6,22 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import styles from './orders.module.css';
 
+interface OrderItem {
+  id: string;
+  title: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 interface Order {
   id: string;
   orderNumber: string;
   status: string;
+  subtotal: number;
   totalAmount: number;
   createdAt: string;
-  items: { quantity: number }[];
+  items: OrderItem[];
 }
 
 const statusLabels: Record<string, string> = {
@@ -120,18 +129,24 @@ export default function OrdersPage() {
                   </span>
                 </div>
                 <div className={styles.infoItem}>
-                  <span className={styles.label}>Items</span>
-                  <span className={styles.value}>
-                    {order.items?.reduce((sum, item) => sum + item.quantity, 0) || 0}
-                  </span>
-                </div>
-                <div className={styles.infoItem}>
                   <span className={styles.label}>Total</span>
                   <span className={styles.value + ' ' + styles.total}>
                     ₺{Number(order.totalAmount).toLocaleString('tr-TR')}
                   </span>
                 </div>
               </div>
+              {order.items && order.items.length > 0 && (
+                <div className={styles.products}>
+                  {order.items.slice(0, 3).map((item, idx) => (
+                    <span key={idx} className={styles.productName}>
+                      {item.quantity}x {item.title}
+                    </span>
+                  ))}
+                  {order.items.length > 3 && (
+                    <span className={styles.moreItems}>+{order.items.length - 3} more</span>
+                  )}
+                </div>
+              )}
             </Link>
           ))}
         </div>
