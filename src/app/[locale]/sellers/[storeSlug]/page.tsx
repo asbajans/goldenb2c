@@ -116,8 +116,11 @@ export default function StoreDetailPage() {
                   </div>
                   <div className={styles.cardBody}>
                     <p className={styles.cardTitle}>{product.title}</p>
+                    {product.priceUSD && (
+                      <p className={styles.cardPrice}>${Number(product.priceUSD).toFixed(2)} USD</p>
+                    )}
                     {product.priceTRY && (
-                      <p className={styles.cardPrice}>₺{Number(product.priceTRY).toLocaleString('tr-TR')}</p>
+                      <p className={styles.cardPriceTRY}>₺{Number(product.priceTRY).toLocaleString('tr-TR')}</p>
                     )}
                   </div>
                 </Link>

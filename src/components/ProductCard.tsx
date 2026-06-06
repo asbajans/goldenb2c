@@ -19,12 +19,13 @@ export interface ProductCardProps {
   discountedPriceUSD?: string;
 }
 
-export default function ProductCard({ id, title, price, priceUSD, storeName, imageUrl, slug, category, isNew, discountRate, discountedPriceUSD }: ProductCardProps) {
+export default function ProductCard({ id, title, price, priceUSD, storeName, imageUrl, slug, category, isNew, discountRate, discountedPrice, discountedPriceUSD }: ProductCardProps) {
   const hasImage = imageUrl && imageUrl !== '/placeholder.jpg' && !imageUrl.startsWith('data:image');
 
   const locale = useLocale();
   const hasDiscount = discountRate && discountRate > 0 && discountedPriceUSD;
   const displayPriceUSD = hasDiscount ? (discountedPriceUSD || priceUSD) : priceUSD;
+  const displayPriceTRY = hasDiscount ? (discountedPrice || price) : price;
 
   return (
     <Link href={`/${locale}/p/${slug}`} className={styles.card} id={`product-${id}`}>
@@ -69,7 +70,7 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
             <span className={styles.priceUSD}>{displayPriceUSD}</span>
           )}
         </div>
-        <div className={styles.priceTRY}>{price}</div>
+        <div className={styles.priceTRY}>{displayPriceTRY}</div>
       </div>
     </Link>
   );

@@ -38,7 +38,8 @@
 .itemQty span { min-width: 40px; text-align: center; font-weight: 600; }
 
 .itemPrice { text-align: right; }
-.unitPrice { font-size: 0.8rem; color: var(--text-muted); text-decoration: line-through; }
+.currentPrice { font-size: 1rem; font-weight: 700; color: var(--gold); }
+.oldPrice { font-size: 0.8rem; color: var(--text-muted); text-decoration: line-through; }
 .totalPrice { font-size: 1.1rem; font-weight: 700; color: var(--gold); }
 
 .clearBtn { align-self: flex-start; padding: 0.5rem 1rem; background: transparent; border: 1px dashed var(--border); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 0.875rem; cursor: pointer; margin-top: 0.5rem; transition: all 0.2s; }

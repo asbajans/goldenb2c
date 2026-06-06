@@ -279,6 +279,7 @@ function ProductsContent() {
                       category={p._categoryName || p.category}
                       isNew={i < 3}
                       discountRate={p.discountRate}
+                      discountedPrice={p.discountRate ? `₺${Number(Number(p.priceTRY) * (1 - p.discountRate / 100)).toLocaleString('tr-TR')}` : undefined}
                       discountedPriceUSD={p.discountRate ? `$${Number(Number(p.priceUSD || 0) * (1 - p.discountRate / 100)).toFixed(0)}` : undefined}
                     />
                   );

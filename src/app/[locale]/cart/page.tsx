@@ -71,7 +71,14 @@ export default function CartPage() {
               </div>
               
               <div className={styles.itemPrice}>
-                <div className={styles.unitPrice}>₺{Number(item.unitPrice).toLocaleString('tr-TR')}</div>
+                {item.discountedPrice ? (
+                  <>
+                    <div className={styles.currentPrice}>₺{Number(item.discountedPrice).toLocaleString('tr-TR')}</div>
+                    <div className={styles.oldPrice}>₺{Number(item.unitPrice).toLocaleString('tr-TR')}</div>
+                  </>
+                ) : (
+                  <div className={styles.currentPrice}>₺{Number(item.unitPrice).toLocaleString('tr-TR')}</div>
+                )}
                 <div className={styles.totalPrice}>₺{Number(item.totalPrice).toLocaleString('tr-TR')}</div>
               </div>
             </div>

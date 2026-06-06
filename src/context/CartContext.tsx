@@ -10,6 +10,7 @@ interface CartItem {
   sku: string;
   quantity: number;
   unitPrice: number;
+  discountedPrice?: number;
   totalPrice?: number;
   image?: string;
   storeName?: string;
@@ -46,6 +47,10 @@ const defaultCart: Cart = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function getEffectivePrice(item: CartItem): number {
+  return item.discountedPrice != null ? item.discountedPrice : item.unitPrice;
+}
+
 function generateId() {
   return Math.random().toString(36).substr(2, 9);
 }
@@ -71,9 +76,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem('gc_cart');
       if (stored) {
         const parsed = JSON.parse(stored);
-        const count = parsed.items?.reduce((sum: number, item: CartItem) => sum + item.quantity, 0) || 0;
-        const total = parsed.items?.reduce((sum: number, item: CartItem) => sum + (item.totalPrice || 0), 0) || 0;
-        setCart({ ...parsed, count, total });
+        const items = (parsed.items || []).map((item: CartItem) => ({
+          ...item,
+          totalPrice: getEffectivePrice(item) * item.quantity
+        }));
+        const count = items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
+        const total = items.reduce((sum: number, item: CartItem) => sum + (item.totalPrice || 0), 0);
+        setCart({ ...parsed, items, count, total });
       }
     } catch (error) {
       console.error('Cart refresh error:', error);
@@ -99,7 +108,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       if (existingIndex >= 0) {
         items[existingIndex].quantity += productData.quantity || 1;
-        items[existingIndex].totalPrice = items[existingIndex].unitPrice * items[existingIndex].quantity;
+        items[existingIndex].totalPrice = getEffectivePrice(items[existingIndex]) * items[existingIndex].quantity;
       } else {
         items.push({
           id: generateId(),
@@ -109,7 +118,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           sku: productData.sku,
           quantity: productData.quantity || 1,
           unitPrice: productData.unitPrice,
-          totalPrice: productData.unitPrice * (productData.quantity || 1),
+          discountedPrice: productData.discountedPrice,
+          totalPrice: (productData.discountedPrice != null ? productData.discountedPrice : productData.unitPrice) * (productData.quantity || 1),
           image: productData.image,
           storeName: productData.storeName,
           storeSlug: productData.storeSlug,
@@ -152,7 +162,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           items.splice(index, 1);
         } else {
           items[index].quantity = quantity;
-          items[index].totalPrice = items[index].unitPrice * quantity;
+          items[index].totalPrice = getEffectivePrice(items[index]) * quantity;
         }
       }
 
