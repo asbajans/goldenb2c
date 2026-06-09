@@ -221,6 +221,10 @@ export default function Home() {
                       imageUrl={isValidImage ? imageUrl : ''}
                       slug={product.slug}
                       category={product._categoryName || product.category}
+                      isNew={i < 2}
+                      discountRate={product.discountRate}
+                      discountedPrice={product.discountRate ? `₺${Number(Number(product.priceTRY) * (1 - product.discountRate / 100)).toLocaleString('tr-TR')}` : undefined}
+                      discountedPriceUSD={product.discountRate ? `$${Number(Number(product.priceUSD || 0) * (1 - product.discountRate / 100)).toFixed(0)}` : undefined}
                     />
                   </div>
                 );

@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import styles from './ProductCard.module.css';
 
 export interface ProductCardProps {
@@ -23,6 +23,8 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
   const hasImage = imageUrl && imageUrl !== '/placeholder.jpg' && !imageUrl.startsWith('data:image');
 
   const locale = useLocale();
+  const tc = useTranslations('Common');
+  const tp = useTranslations('Products');
   const hasDiscount = discountRate && discountRate > 0 && discountedPriceUSD;
   const displayPriceUSD = hasDiscount ? (discountedPriceUSD || priceUSD) : priceUSD;
   const displayPriceTRY = hasDiscount ? (discountedPrice || price) : price;
@@ -47,11 +49,11 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
         <div className={styles.overlay} />
         <div className={styles.badges}>
           {hasDiscount && <span className={styles.discountBadge}>-%{discountRate}</span>}
-          {isNew && <span className={styles.badgeNew}>New</span>}
+          {isNew && <span className={styles.badgeNew}>{tp('newArrival')}</span>}
           {category && <span className={styles.badgeCat}>{category}</span>}
         </div>
         <div className={styles.quickAdd}>
-          <span>View Details</span>
+          <span>{tc('viewProduct')}</span>
         </div>
       </div>
       <div className={styles.content}>
