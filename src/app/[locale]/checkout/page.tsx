@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/context/CartContext';
 import styles from './checkout.module.css';
@@ -23,13 +23,15 @@ interface Address {
   isDefault: boolean;
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const t = useTranslations('Checkout');
   const tc = useTranslations('Common');
   
   const router = useRouter();
-  const { cart, clearCart } = useCart();
+  const searchParams = useSearchParams();
+  const { cart, addItem, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(false);
   const [bankInfo, setBankInfo] = useState<BankInfo>({});
   const [addresses, setAddresses] = useState<Address[]>([]);
   
@@ -55,7 +57,6 @@ export default function CheckoutPage() {
       }))
       .catch(console.error);
       
-    // Fetch user addresses
     const token = localStorage.getItem('gc_token');
     if (token) {
       fetch('/api/addresses', { headers: { Authorization: `Bearer ${token}` } })
@@ -70,6 +71,53 @@ export default function CheckoutPage() {
           }
         })
         .catch(console.error);
+    }
+  }, []);
+
+  // Handle meta products and coupon from URL
+  useEffect(() => {
+    const productsParam = searchParams.get('products');
+    const couponParam = searchParams.get('coupon');
+
+    if (productsParam) {
+      setInitializing(true);
+      const entries = productsParam.split(',').filter(Boolean);
+      
+      Promise.all(entries.map(async (entry: string) => {
+        const [productKey, qtyStr] = entry.split(':');
+        const quantity = parseInt(qtyStr) || 1;
+        // productKey format: UUID_variant or just UUID
+        const productId = productKey.split('_')[0];
+        
+        try {
+          const res = await fetch(`/api/products/by-id/${productId}?lang=en`);
+          if (!res.ok) return null;
+          const product = await res.json();
+          return { product, quantity };
+        } catch {
+          return null;
+        }
+      })).then(results => {
+        const valid = results.filter(Boolean) as any[];
+        for (const { product, quantity } of valid) {
+          addItem({
+            productId: product.id,
+            title: product.title,
+            sku: product.sku || '',
+            unitPrice: product.discountedPrice || product.priceTRY || 0,
+            discountedPrice: product.discountedPrice,
+            quantity,
+            image: product.images?.[0] || '',
+            storeName: product.store?.storeName,
+            storeSlug: product.store?.storeSlug,
+          });
+        }
+        setInitializing(false);
+      });
+    }
+
+    if (couponParam) {
+      sessionStorage.setItem('gc_coupon', couponParam);
     }
   }, []);
 
@@ -133,6 +181,15 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  if (initializing) {
+    return (
+      <div className={styles.empty}>
+        <h1>Preparing your cart...</h1>
+        <p>Please wait while we load your products.</p>
+      </div>
+    );
+  }
 
   if (!cart?.items?.length) {
     return (
@@ -300,5 +357,13 @@ export default function CheckoutPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className={styles.empty}><h1>Loading...</h1></div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
