@@ -8,7 +8,12 @@ import styles from './product.module.css';
 
 const SITE_URL = 'https://goldencrafters.com';
 
-function generateProductSchema(product: any, price: number, priceUSD: number | null) {
+function generateProductSchema(product: any, price: number, priceUSD: number | null, jsonLd?: any) {
+  // Use backend-provided JSON-LD if available (includes genuine aggregateRating/review from approved reviews)
+  if (jsonLd) {
+    return jsonLd;
+  }
+  // Fallback: basic schema without aggregateRating (no fake ratings)
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -25,12 +30,7 @@ function generateProductSchema(product: any, price: number, priceUSD: number | n
       priceValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       availability: product.quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: product.store?.storeName || 'Golden Crafters' }
-    },
-    aggregateRating: product.store?.rating ? {
-      '@type': 'AggregateRating',
-      ratingValue: product.store.rating,
-      reviewCount: product.store.totalProducts || 0
-    } : undefined
+    }
   };
 }
 
@@ -40,6 +40,8 @@ export default function ProductDetailPage() {
   const slug = params?.slug as string;
   const locale = params?.locale as string || 'en';
   const [product, setProduct] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
@@ -60,6 +62,19 @@ export default function ProductDetailPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [slug, locale]);
+
+  // Fetch approved reviews from backend
+  useEffect(() => {
+    if (!product?.id) return;
+    setReviewsLoading(true);
+    fetch(`/api/reviews/product/${product.id}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d?.reviews) setReviews(d.reviews);
+      })
+      .catch(console.error)
+      .finally(() => setReviewsLoading(false));
+  }, [product?.id]);
 
   useEffect(() => {
     if (!user || !product?.id) return;
@@ -105,7 +120,7 @@ export default function ProductDetailPage() {
     ? Object.keys(variants[0].attributes || {})
     : [];
 
-  const productSchema = generateProductSchema(product, Number(price) || 0, priceUSD ? Number(priceUSD) : null);
+  const productSchema = generateProductSchema(product, Number(price) || 0, priceUSD ? Number(priceUSD) : null, product.jsonLd);
 
   async function toggleWishlist() {
     if (!user) {
@@ -339,6 +354,39 @@ export default function ProductDetailPage() {
             <div className={styles.descBlock}>
               <h3>Description</h3>
               <p>{product.description}</p>
+            </div>
+          )}
+
+          {/* Reviews */}
+          {(reviews.length > 0 || reviewsLoading) && (
+            <div className={styles.reviewsBlock}>
+              <h3>Reviews ({reviews.length})</h3>
+              {reviewsLoading ? (
+                <div className={styles.reviewsLoading}>Loading reviews...</div>
+              ) : reviews.length > 0 ? (
+                <div className={styles.reviewsList}>
+                  {reviews.map((review: any) => (
+                    <div key={review.id} className={styles.reviewItem}>
+                      <div className={styles.reviewHeader}>
+                        <span className={styles.reviewAuthor}>{review.reviewerName}</span>
+                        <span className={styles.reviewDate}>
+                          {new Date(review.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </span>
+                      </div>
+                      <div className={styles.reviewRating}>
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className={i < review.rating ? styles.starFilled : styles.starEmpty}>★</span>
+                        ))}
+                      </div>
+                      {review.title && <div className={styles.reviewTitle}>{review.title}</div>}
+                      {review.comment && <div className={styles.reviewComment}>{review.comment}</div>}
+                      {review.isVerifiedPurchase && <span className={styles.verifiedBadge}>Verified Purchase</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.noReviews}>No reviews yet. Be the first to review!</p>
+              )}
             </div>
           )}
 
