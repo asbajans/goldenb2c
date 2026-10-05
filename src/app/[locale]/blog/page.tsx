@@ -65,7 +65,7 @@ export default function BlogPage() {
                       <div className={styles.cardBody}>
                         <h3 className={styles.cardTitle}>{tr.title || ''}</h3>
                         {tr.excerpt && <p className={styles.cardExcerpt}>{tr.excerpt}</p>}
-                        {tr.content && <div className={styles.cardContent}>{tr.content}</div>}
+                        {tr.content && <div className={styles.cardContent} style={{ whiteSpace: 'pre-line' }}>{tr.content}</div>}
                       </div>
                     </Link>
                   );

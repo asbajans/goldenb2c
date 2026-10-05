@@ -4,7 +4,7 @@ import { LOCALE_CATEGORIES, LOCALE_CITIES } from '@/data/cities';
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'https://api.asb.web.tr/api';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://goldencrafters.com';
 
-const LOCALES = ['en', 'tr', 'it', 'ar'];
+const LOCALES = ['en', 'tr', 'it', 'ar', 'es'];
 
 const STATIC_PAGES: { path: string; freq: string; prio: string }[] = [
   { path: '', freq: 'daily', prio: '1.0' },
@@ -64,6 +64,25 @@ export async function GET() {
               if (vid) urls.push(`  <url><loc>${SITE_URL}/${locale}/p/${slug}/v/${vid}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`);
             }
           }
+        }
+      }
+    }
+  } catch {}
+
+  // 5. Blog posts from public settings (keeps articles discoverable)
+  try {
+    const res = await fetch(`${BACKEND}/settings/public`, {
+      signal: AbortSignal.timeout(10000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const posts = data?.blog_posts ? JSON.parse(data.blog_posts) : [];
+      const active = (Array.isArray(posts) ? posts : [])
+        .filter((p: any) => p && p.isActive !== false && p.id !== undefined)
+        .slice(0, 500);
+      for (const locale of LOCALES) {
+        for (const post of active) {
+          urls.push(`  <url><loc>${SITE_URL}/${locale}/blog/${post.id}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`);
         }
       }
     }

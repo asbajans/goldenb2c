@@ -66,7 +66,7 @@ export default function BlogDetailPage() {
 
         {tr.excerpt && <p className={styles.excerpt}>{tr.excerpt}</p>}
 
-        {tr.content && <div className={styles.content}>{tr.content}</div>}
+        {tr.content && <div className={styles.content} style={{ whiteSpace: 'pre-line' }}>{tr.content}</div>}
 
         {/* Share */}
         <div className={styles.share}>
