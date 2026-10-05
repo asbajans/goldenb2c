@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import ProductCard from '@/components/ProductCard';
@@ -44,6 +44,10 @@ function ProductsContent() {
 
   const limit = 24;
 
+  // Latest request sequence (see loadProducts guard). Bumped on every new
+  // search so stale responses are ignored.
+  const requestSeq = useRef(0);
+
   const SORT_OPTIONS = [
     { value: 'newest', label: t('newest') },
     { value: 'price_asc', label: t('priceLowToHigh') },
@@ -60,6 +64,10 @@ function ProductsContent() {
   }, [locale]);
 
   const loadProducts = useCallback(() => {
+    // Sequence guard: keystrokes fire overlapping requests; a slow earlier
+    // response (e.g. for "k") must never overwrite a later one ("kolye"),
+    // which used to show ALL products after searching.
+    const seq = ++requestSeq.current;
     setLoading(true);
     const params = new URLSearchParams({
       page: String(page),
@@ -75,20 +83,26 @@ function ProductsContent() {
     fetch(`/api/products?${params.toString()}`)
       .then(r => r.json())
       .then(d => {
+        if (seq !== requestSeq.current) return;
         setProducts(Array.isArray(d?.data) ? d.data : []);
         setTotal(d?.pagination?.total ?? 0);
       })
       .catch(console.error)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (seq === requestSeq.current) setLoading(false);
+      });
   }, [page, activeCategory, search, sort, minPrice, maxPrice]);
 
   useEffect(() => {
     loadCategories();
   }, [loadCategories]);
 
+  // Debounced fetch: typing fires one request ~400ms after the last keystroke
+  // instead of one per keystroke (fewer backend hits, no response races).
   useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+    const t = setTimeout(() => loadProducts(), search ? 400 : 0);
+    return () => clearTimeout(t);
+  }, [loadProducts, search]);
 
   useEffect(() => {
     setPage(1);

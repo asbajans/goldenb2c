@@ -8,6 +8,21 @@ import styles from './detail.module.css';
 
 const SITE_URL = 'https://goldencrafters.com';
 
+// Plain-text article bodies may contain URLs (e.g. the featured-product CTA
+// appended by AI generation) — render them as clickable links. React elements
+// only, no dangerouslySetInnerHTML.
+function renderWithLinks(text: string) {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a key={i} href={part} target="_blank" rel="noopener noreferrer" style={{ color: '#b8860b', wordBreak: 'break-all' }}>
+        {part}
+      </a>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
+}
+
 export default function BlogDetailPage() {
   const params = useParams();
   const locale = useLocale();
@@ -66,7 +81,7 @@ export default function BlogDetailPage() {
 
         {tr.excerpt && <p className={styles.excerpt}>{tr.excerpt}</p>}
 
-        {tr.content && <div className={styles.content} style={{ whiteSpace: 'pre-line' }}>{tr.content}</div>}
+        {tr.content && <div className={styles.content} style={{ whiteSpace: 'pre-line' }}>{renderWithLinks(tr.content)}</div>}
 
         {/* Share */}
         <div className={styles.share}>
