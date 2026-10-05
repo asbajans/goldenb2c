@@ -324,13 +324,16 @@ export default function Home() {
             <Link href="/blog" className={styles.seeAll}>{tc('viewAll')} →</Link>
           </div>
           <div className={styles.blogGrid}>
-            {blogPosts.slice(0, 4).map((post) => {
+            {[...blogPosts]
+              // Newest first (post ids are creation timestamps)
+              .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
+              .slice(0, 4).map((post) => {
               const tr = post.translations?.[locale] || post.translations?.en || {};
               return (
                 <Link key={post.id} href={`/blog/${post.id}`} className={styles.blogCard}>
                   <div className={styles.blogImageWrap}>
                     {post.imageUrl ? (
-                      <img src={post.imageUrl} alt={tr.title || ''} className={styles.blogImage} />
+                      <img src={post.imageUrl} alt={tr.title || ''} className={styles.blogImage} loading="lazy" />
                     ) : (
                       <div className={styles.blogImagePlaceholder}>
                         <span>📝</span>
@@ -340,7 +343,7 @@ export default function Home() {
                   <div className={styles.blogBody}>
                     <h3 className={styles.blogTitle}>{tr.title || ''}</h3>
                     {tr.excerpt && <p className={styles.blogExcerpt}>{tr.excerpt}</p>}
-                    <span className={styles.blogLink}>Read More →</span>
+                    <span className={styles.blogLink}>{tc('readMore')} →</span>
                   </div>
                 </Link>
               );

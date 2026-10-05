@@ -54,18 +54,21 @@ export default function BlogPage() {
           {!loading && posts.length > 0 && (
             <div className={styles.grid}>
               {posts
-                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                // Newest first (post ids are creation timestamps)
+                .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
                 .map(post => {
                   const tr = post.translations?.[locale] || post.translations?.en || {};
+                  // NOTE: routing Link auto-prefixes the locale — do NOT add
+                  // `/${locale}` manually (it produced /tr/tr/blog/... 404s).
                   return (
-                    <Link key={post.id} href={`/${locale}/blog/${post.id}`} className={styles.card} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                    <Link key={post.id} href={`/blog/${post.id}`} className={styles.card}>
                       {post.imageUrl && (
-                        <img src={post.imageUrl} alt={tr.title || ''} className={styles.cardImage} />
+                        <img src={post.imageUrl} alt={tr.title || ''} className={styles.cardImage} loading="lazy" />
                       )}
                       <div className={styles.cardBody}>
                         <h3 className={styles.cardTitle}>{tr.title || ''}</h3>
                         {tr.excerpt && <p className={styles.cardExcerpt}>{tr.excerpt}</p>}
-                        {tr.content && <div className={styles.cardContent} style={{ whiteSpace: 'pre-line' }}>{tr.content}</div>}
+                        <span className={styles.readMore}>{t('readMore')} →</span>
                       </div>
                     </Link>
                   );
