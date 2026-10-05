@@ -129,6 +129,18 @@ JWT token `localStorage`'da `gc_token` anahtarıyla saklanır. AuthContext uygul
 ### Sepet
 Guest sepet: localStorage tabanlı. Authenticated sepet: backend API üzerinden. CartContext her iki durumu da yönetir.
 
+### Checkout Tutar Kuralları (KRİTİK — Stripe 2x/3x bug'ı buradan çıktı)
+- `/api/cart/checkout` proxy'si backend'e **`cartItems` + `orderId` iletir, ASLA `/cart/add` döngüsü yapmaz.** Eski proxy her "Öde" tıklamasında DB sepetine miktarı ekliyordu (1x→2x→3x).
+- Checkout sayfası ilk başarılı yanıttaki `orderId`'yi `sessionStorage (gc_checkout_order_id)`'de saklar ve her tekrarda gönderir → backend aynı siparişi yeniden kullanır (tutar sabit).
+- Çift tıklama koruması: `submittingRef` guard + disabled buton.
+- `?products=` ile gelen ürünler sadece eksik miktar kadar eklenir (remount-safe deficit mantığı).
+- Ödeme yöntemleri `/api/settings`'teki admin toggle'larına göre gösterilir (`payment_bank_transfer_enabled`, `payment_credit_card_enabled`). Anahtar yoksa (eski backend) iki yöntem de görünür kalır.
+- Başarı sayfası (`order/[id]`) localStorage sepeti temizler; `lastOrder` pixel takibi için korunur.
+
+### IndexNow
+- Doğrulama dosyası `public/<anahtar>.txt` (içeriği = anahtarın kendisi). Anahtar backend `GlobalSetting.indexnow_key` ile aynı olmalı.
+- Sitemap (`/sitemap.xml`): 5 locale (en,tr,it,ar,es) + aktif blog yazıları dahildir.
+
 ## Önemli Uyarılar
 
 1. **Backend ayrı repo**: `golden-marketplace/` reposundaki API'ye bağımlıdır. API değişikliklerinde frontend type'larını manuel güncelleyin.
