@@ -43,6 +43,8 @@ function CheckoutContent() {
   // settings). Defaults mirror the backend seed until settings load.
   const [bankEnabled, setBankEnabled] = useState(true);
   const [ccEnabled, setCcEnabled] = useState(true);
+  // USD/TRY rate for displaying the USD equivalent Stripe will charge.
+  const [usdTryRate, setUsdTryRate] = useState<number | null>(null);
   
   const [form, setForm] = useState({
     name: '',
@@ -79,6 +81,8 @@ function CheckoutContent() {
         const cc = d.payment_credit_card_enabled === undefined
           ? true
           : d.payment_credit_card_enabled === 'true';
+        const rate = Number(d.usd_try_rate);
+        if (rate > 0) setUsdTryRate(rate);
         setBankEnabled(bank);
         setCcEnabled(cc);
         setPaymentMethod(prev => {
@@ -413,10 +417,21 @@ function CheckoutContent() {
             ))}
           </div>
           <div className={styles.divider} style={{ margin: '1rem 0', borderBottom: '1px solid #eaeaea' }} />
-          <div className={styles.totalRow} style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '1.5rem' }}>
+          <div className={styles.totalRow} style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '0.5rem' }}>
             <span>Total</span>
             <span>₺{Number(cart.total).toLocaleString('tr-TR')}</span>
           </div>
+          {usdTryRate && usdTryRate > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#666', fontSize: '0.95rem', marginBottom: '0.5rem' }}>
+              <span>{tc('usdCharged')}</span>
+              <span>${(Number(cart.total) / usdTryRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
+            </div>
+          )}
+          {paymentMethod === 'stripe' && (
+            <div style={{ background: '#fffbe6', border: '1px solid #ffe58f', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.85rem', color: '#614700', marginBottom: '1rem' }}>
+              💳 {tc('bankRateNote')}
+            </div>
+          )}
           <button 
             type="submit" 
             className={styles.submitBtn} 

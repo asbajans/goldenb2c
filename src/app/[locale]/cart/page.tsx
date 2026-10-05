@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -9,8 +9,20 @@ import styles from './cart.module.css';
 export default function CartPage() {
   const t = useTranslations('Cart');
   const tc = useTranslations('Common');
-  
+
   const { cart, loading, updateItem, removeItem, clearCart } = useCart();
+  const [usdTryRate, setUsdTryRate] = useState<number | null>(null);
+
+  // USD/TRY rate for the USD equivalent (same rate Stripe is charged with).
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => {
+        const rate = Number(d.usd_try_rate);
+        if (rate > 0) setUsdTryRate(rate);
+      })
+      .catch(() => {});
+  }, []);
 
   if (loading) {
     return (
@@ -108,6 +120,12 @@ export default function CartPage() {
             <span>{t('total')}</span>
             <span>₺{Number(cart.total).toLocaleString('tr-TR')}</span>
           </div>
+          {usdTryRate && usdTryRate > 0 && (
+            <div className={styles.summaryRow} style={{ color: '#666', fontSize: '0.9rem' }}>
+              <span>{tc('usdCharged')}</span>
+              <span>${(Number(cart.total) / usdTryRate).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</span>
+            </div>
+          )}
           
           <Link href="/checkout" className={styles.checkoutBtn}>
             {t('proceedToCheckout')}

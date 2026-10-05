@@ -16,6 +16,8 @@
     "edit": "Editar",
     "viewAll": "Ver Todo",
     "readMore": "Leer más",
+    "usdCharged": "Cargado a la tarjeta",
+    "bankRateNote": "Los pagos con tarjeta se cobran en USD. El importe en TRY puede variar según el tipo de cambio de tu banco.",
     "seeAll": "Ver todo",
     "loading": "Cargando...",
     "noResults": "No se encontraron resultados",

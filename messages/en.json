@@ -16,6 +16,8 @@
     "edit": "Edit",
     "viewAll": "View All",
     "readMore": "Read More",
+    "usdCharged": "Charged on card",
+    "bankRateNote": "Credit card payments are charged in USD. The TRY amount on your statement may differ depending on your bank's exchange rate.",
     "seeAll": "See all",
     "loading": "Loading...",
     "noResults": "No results found",

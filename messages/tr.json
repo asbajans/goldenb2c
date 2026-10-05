@@ -16,6 +16,8 @@
     "edit": "Düzenle",
     "viewAll": "Tümünü Gör",
     "readMore": "Devamını Oku",
+    "usdCharged": "Karttan çekilecek",
+    "bankRateNote": "Kredi kartı ödemeleri USD olarak tahsil edilir. Ekstrenize yansıyacak TRY tutarı bankanızın kuruna göre farklılık gösterebilir.",
     "seeAll": "Tümünü gör",
     "loading": "Yükleniyor...",
     "noResults": "Sonuç bulunamadı",
