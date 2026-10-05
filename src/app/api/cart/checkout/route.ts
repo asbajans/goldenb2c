@@ -25,21 +25,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (body.cartItems?.length) {
-      for (const item of body.cartItems) {
-        await fetch(`${BACKEND}/cart/add`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            productId: item.productId,
-            variantId: item.variantId,
-            quantity: item.quantity
-          }),
-          credentials: 'include'
-        });
-      }
-    }
-    
+    // NOTE: cartItems are forwarded to the backend as-is (MODE 1: order is
+    // created from scratch) or, when orderId is present, the SAME pending
+    // order is reused (MODE 0: idempotent retry). We must NEVER call
+    // backend /cart/add here: it increments the persistent DB cart, so every
+    // "Pay" attempt inflated the quantity (1x -> 2x -> 3x...) and Stripe
+    // charged the multiplied amount. See backend routes/cart.ts.
     const res = await fetch(`${BACKEND}/cart/checkout`, {
       method: 'POST',
       headers,
@@ -50,7 +41,9 @@ export async function POST(request: NextRequest) {
         city: body.city,
         country: body.country,
         notes: body.notes,
-        paymentMethod: body.paymentMethod
+        paymentMethod: body.paymentMethod,
+        cartItems: body.cartItems,
+        orderId: body.orderId,
       }),
       credentials: 'include'
     });

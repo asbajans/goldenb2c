@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -34,6 +34,15 @@ function CheckoutContent() {
   const [initializing, setInitializing] = useState(false);
   const [bankInfo, setBankInfo] = useState<BankInfo>({});
   const [addresses, setAddresses] = useState<Address[]>([]);
+  // Backend order id of the current checkout attempt. Persisted so that going
+  // back from Stripe and pressing "Pay" again reuses the SAME order (backend
+  // MODE 0) instead of creating a new one — the charged amount stays stable.
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const submittingRef = useRef(false);
+  // Admin-controlled payment toggles (from /api/settings -> backend public
+  // settings). Defaults mirror the backend seed until settings load.
+  const [bankEnabled, setBankEnabled] = useState(true);
+  const [ccEnabled, setCcEnabled] = useState(true);
   
   const [form, setForm] = useState({
     name: '',
@@ -47,14 +56,39 @@ function CheckoutContent() {
   const [paymentMethod, setPaymentMethod] = useState('bankTransfer');
 
   useEffect(() => {
+    try {
+      const pending = sessionStorage.getItem('gc_checkout_order_id');
+      if (pending) setOrderId(pending);
+    } catch { /* sessionStorage unavailable */ }
+
     fetch('/api/settings')
       .then(r => r.json())
-      .then(d => setBankInfo({
-        bank_name: d.bank_name,
-        bank_iban: d.bank_iban,
-        bank_account_name: d.bank_account_name,
-        bank_swift: d.bank_swift
-      }))
+      .then(d => {
+        setBankInfo({
+          bank_name: d.bank_name,
+          bank_iban: d.bank_iban,
+          bank_account_name: d.bank_account_name,
+          bank_swift: d.bank_swift
+        });
+        // Respect Admin Panel -> Odeme Yonetimi toggles. A MISSING key means an
+        // older backend that still hides the flags (isPublic=false bug) — in
+        // that case keep the current behaviour (both methods visible) so
+        // working card payments are never hidden during the transition.
+        // The backend enforces the toggles too once it is redeployed.
+        const bank = d.payment_bank_transfer_enabled !== 'false';
+        const cc = d.payment_credit_card_enabled === undefined
+          ? true
+          : d.payment_credit_card_enabled === 'true';
+        setBankEnabled(bank);
+        setCcEnabled(cc);
+        setPaymentMethod(prev => {
+          if (prev === 'bankTransfer' && bank) return prev;
+          if (prev === 'stripe' && cc) return prev;
+          if (bank) return 'bankTransfer';
+          if (cc) return 'stripe';
+          return prev;
+        });
+      })
       .catch(console.error);
       
     const token = localStorage.getItem('gc_token');
@@ -99,18 +133,32 @@ function CheckoutContent() {
         }
       })).then(results => {
         const valid = results.filter(Boolean) as any[];
+        // Idempotent: only add the quantity that is NOT already in the cart.
+        // Without this, every remount (e.g. coming back from Stripe and
+        // pressing Pay again) incremented the quantities 1x -> 2x -> 3x.
+        let existingItems: any[] = [];
+        try {
+          const stored = localStorage.getItem('gc_cart');
+          existingItems = stored ? JSON.parse(stored).items || [] : [];
+        } catch { /* ignore corrupt cart */ }
         for (const { product, quantity } of valid) {
+          const already = existingItems
+            .filter((i: any) => i.productId === product.id)
+            .reduce((s: number, i: any) => s + (Number(i.quantity) || 0), 0);
+          const deficit = quantity - already;
+          if (deficit <= 0) continue;
           addItem({
             productId: product.id,
             title: product.title,
             sku: product.sku || '',
             unitPrice: product.discountedPrice || product.priceTRY || 0,
             discountedPrice: product.discountedPrice,
-            quantity,
+            quantity: deficit,
             image: product.images?.[0] || '',
             storeName: product.store?.storeName,
             storeSlug: product.store?.storeSlug,
           });
+          existingItems.push({ productId: product.id, quantity: deficit });
         }
         setInitializing(false);
       });
@@ -138,6 +186,11 @@ function CheckoutContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cart?.items?.length) return;
+    // Double-submit guard: React state updates are async, so rapid double
+    // clicks could fire two checkouts before `loading` disables the button.
+    // Each duplicate used to create an extra order / inflate the amount.
+    if (submittingRef.current) return;
+    submittingRef.current = true;
 
     setLoading(true);
     try {
@@ -154,13 +207,24 @@ function CheckoutContent() {
       const res = await fetch('/api/cart/checkout', {
         method: 'POST',
         headers,
-        body: JSON.stringify({ ...form, paymentMethod, cartItems })
+        body: JSON.stringify({ ...form, paymentMethod, cartItems, orderId })
       });
       const data = await res.json();
 
       if (data.success || data.orderId) {
+        const newOrderId = data.orderId || data.id;
+        try {
+          if (data.checkoutUrl) {
+            // Stripe: remember the order so a retry reuses it (stable amount).
+            sessionStorage.setItem('gc_checkout_order_id', newOrderId);
+          } else {
+            sessionStorage.removeItem('gc_checkout_order_id');
+          }
+        } catch { /* ignore */ }
+        setOrderId(data.checkoutUrl ? newOrderId : null);
+
         sessionStorage.setItem('lastOrder', JSON.stringify({
-          id: data.orderId || data.id,
+          id: newOrderId,
           total: data.total || 0,
           currency: 'TRY'
         }));
@@ -169,7 +233,7 @@ function CheckoutContent() {
           window.location.href = data.checkoutUrl;
         } else {
           await clearCart();
-          router.push(`/order/${data.orderId || data.id}?success=1`);
+          router.push(`/order/${newOrderId}?success=1`);
         }
       } else {
         alert(data.error || 'Checkout failed');
@@ -178,6 +242,7 @@ function CheckoutContent() {
       console.error(error);
       alert('Checkout failed');
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   };
@@ -276,27 +341,36 @@ function CheckoutContent() {
 
           <section className={styles.section}>
             <h2>Payment Method</h2>
+            {!bankEnabled && !ccEnabled && (
+              <p style={{ color: '#a00' }}>
+                Online payment methods are currently disabled. Please contact us to complete your order.
+              </p>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  value="stripe" 
-                  checked={paymentMethod === 'stripe'} 
-                  onChange={(e) => setPaymentMethod(e.target.value)} 
-                />
-                <span>Credit Card (Stripe)</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  value="bankTransfer" 
-                  checked={paymentMethod === 'bankTransfer'} 
-                  onChange={(e) => setPaymentMethod(e.target.value)} 
-                />
-                <span>Bank Transfer / EFT</span>
-              </label>
+              {ccEnabled && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="stripe"
+                    checked={paymentMethod === 'stripe'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <span>Credit Card (Stripe)</span>
+                </label>
+              )}
+              {bankEnabled && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="bankTransfer"
+                    checked={paymentMethod === 'bankTransfer'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <span>Bank Transfer / EFT</span>
+                </label>
+              )}
             </div>
 
             {paymentMethod === 'bankTransfer' && (bankInfo.bank_name || bankInfo.bank_iban) && (
