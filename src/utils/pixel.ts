@@ -242,7 +242,13 @@ export function trackPurchase(orderId: string, value: number, currency: string =
     ttq.track('CompletePayment', { content_id: orderId, value, currency });
   }
   if (settings.googleAnalyticsId && typeof gtag !== 'undefined') {
-    gtag('event', 'purchase', { transaction_id: orderId, value, currency });
+    // Scoped to GA4 only: an unscoped purchase event would also land on the
+    // AW container and could be auto-counted as a second Ads conversion
+    // alongside the explicit conversion event below.
+    gtag('event', 'purchase', {
+      'send_to': settings.googleAnalyticsId,
+      transaction_id: orderId, value, currency
+    });
   }
   trackGoogleAdsConversion(orderId, value, currency);
 }
