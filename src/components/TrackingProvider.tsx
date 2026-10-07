@@ -17,13 +17,16 @@ export default function TrackingProvider({ children }: { children: React.ReactNo
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
+        // Admin panelinden gelen ID'lerde baş/son boşluk olabiliyor
+        // (örn. " GTM-XXXX" iframe URL'ini bozup 404 veriyordu) — kırp.
+        const clean = (v: unknown) => (typeof v === 'string' ? v.trim() : undefined) || undefined;
         const settings = {
-          facebookPixelId: data.facebook_pixel_id,
-          tiktokPixelId: data.tiktok_pixel_id,
-          googleAnalyticsId: data.google_analytics_id,
-          googleGtmId: data.google_gtm_id,
-          googleAdsId: data.google_ads_id,
-          googleAdsConversionLabel: data.google_ads_conversion_label,
+          facebookPixelId: clean(data.facebook_pixel_id),
+          tiktokPixelId: clean(data.tiktok_pixel_id),
+          googleAnalyticsId: clean(data.google_analytics_id),
+          googleGtmId: clean(data.google_gtm_id),
+          googleAdsId: clean(data.google_ads_id),
+          googleAdsConversionLabel: clean(data.google_ads_conversion_label),
         };
         initPixels(settings);
       })
