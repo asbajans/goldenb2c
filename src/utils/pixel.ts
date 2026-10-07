@@ -3,6 +3,8 @@ type PixelSettings = {
   tiktokPixelId?: string;
   googleAnalyticsId?: string;
   googleGtmId?: string;
+  googleAdsId?: string;
+  googleAdsConversionLabel?: string;
 };
 
 declare const fbq: any;
@@ -41,6 +43,9 @@ export async function initPixels(pixelSettings: PixelSettings) {
   }
   if (settings.googleAnalyticsId) {
     promises.push(initGoogleAnalytics(settings.googleAnalyticsId));
+  }
+  if (settings.googleAdsId) {
+    promises.push(initGoogleAds(settings.googleAdsId));
   }
 
   await Promise.all(promises);
@@ -155,6 +160,32 @@ function initGoogleAnalytics(gaId: string): Promise<void> {
   });
 }
 
+function initGoogleAds(adsId: string): Promise<void> {
+  return new Promise((resolve) => {
+    // Ensure a gtag() stub exists even when no GA4 ID is configured.
+    if (!document.querySelector('script[data-gtag]')) {
+      const stub = document.createElement('script');
+      stub.setAttribute('data-gtag', '');
+      stub.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+      `;
+      document.head.appendChild(stub);
+    }
+    if (!document.querySelector(`script[src*="gtag/js?id=${adsId}"]`)) {
+      const loader = document.createElement('script');
+      loader.async = true;
+      loader.src = `https://www.googletagmanager.com/gtag/js?id=${adsId}`;
+      document.head.appendChild(loader);
+    }
+    if (typeof gtag !== 'undefined') {
+      try { gtag('config', adsId); } catch { /* ignore */ }
+    }
+    resolve();
+  });
+}
+
 export function trackPageView(path: string, title?: string) {
   if (settings.facebookPixelId && typeof fbq !== 'undefined') {
     fbq('track', 'PageView');
@@ -213,6 +244,28 @@ export function trackPurchase(orderId: string, value: number, currency: string =
   if (settings.googleAnalyticsId && typeof gtag !== 'undefined') {
     gtag('event', 'purchase', { transaction_id: orderId, value, currency });
   }
+  trackGoogleAdsConversion(orderId, value, currency);
+}
+
+/**
+ * Google Ads "Satın alma işlemi" conversion (AW-ID/label from public settings).
+ * Fires exactly once per order — reload-safe via sessionStorage guard, and
+ * Google dedupes on transaction_id server-side as well.
+ */
+export function trackGoogleAdsConversion(orderId: string, value: number, currency: string = 'TRY') {
+  if (!settings.googleAdsId || !settings.googleAdsConversionLabel) return;
+  if (typeof gtag === 'undefined') return;
+  try {
+    const guardKey = `google_ads_converted_${orderId}`;
+    if (sessionStorage.getItem(guardKey)) return;
+    gtag('event', 'conversion', {
+      'send_to': `${settings.googleAdsId}/${settings.googleAdsConversionLabel}`,
+      'value': value,
+      'currency': currency,
+      'transaction_id': orderId,
+    });
+    sessionStorage.setItem(guardKey, '1');
+  } catch { /* ignore */ }
 }
 
 export function trackSearch(searchTerm: string) {

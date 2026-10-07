@@ -22,6 +22,8 @@ export default function TrackingProvider({ children }: { children: React.ReactNo
           tiktokPixelId: data.tiktok_pixel_id,
           googleAnalyticsId: data.google_analytics_id,
           googleGtmId: data.google_gtm_id,
+          googleAdsId: data.google_ads_id,
+          googleAdsConversionLabel: data.google_ads_conversion_label,
         };
         initPixels(settings);
       })

@@ -1,16 +1,19 @@
 'use client';
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { trackPurchase } from '@/utils/pixel';
 import styles from './order.module.css';
 
 import { Suspense } from 'react';
 
 function OrderSuccessContent() {
+  const params = useParams();
   const searchParams = useSearchParams();
   const success = searchParams.get('success');
   const orderId = searchParams.get('orderId');
+  const routeId = (params?.id as string) || orderId;
   const { clearCart } = useCart();
 
   // After a successful payment (esp. returning from Stripe) the local cart
@@ -24,6 +27,23 @@ function OrderSuccessContent() {
       sessionStorage.removeItem('gc_checkout_order_id');
     } catch { /* ignore */ }
   }, [success]);
+
+  // Fire purchase conversion (GA4 purchase + Google Ads conversion + Meta/TikTok)
+  // directly on the success page. Required because returning from Stripe is a
+  // full page load, which TrackingProvider's route-change listener misses.
+  // trackPurchase/trackGoogleAdsConversion are idempotent per order, so the
+  // client-side (bank transfer) flow can't double-report either.
+  useEffect(() => {
+    if (!success) return;
+    try {
+      const stored = sessionStorage.getItem('lastOrder');
+      if (!stored) return;
+      const order = JSON.parse(stored);
+      const id = order.id || routeId;
+      if (!id) return;
+      trackPurchase(id, order.total || 0, order.currency || 'TRY');
+    } catch { /* ignore */ }
+  }, [success, routeId]);
 
   if (!success) {
     return (
@@ -42,7 +62,7 @@ function OrderSuccessContent() {
         <div className={styles.icon}>✅</div>
         <h1>Thank You!</h1>
         <p>Your order has been placed successfully.</p>
-        {orderId && <p className={styles.orderId}>Order #: {orderId}</p>}
+        {routeId && <p className={styles.orderId}>Order #: {routeId}</p>}
         
         <div className={styles.info}>
           <p>We'll send you an email confirmation shortly.</p>
