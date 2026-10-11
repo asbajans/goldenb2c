@@ -44,6 +44,12 @@ export default function AccountPage() {
           <p>View your order history and track shipments</p>
         </Link>
 
+        <Link href="/account/returns" className={styles.card}>
+          <div className={styles.cardIcon}>↩️</div>
+          <h3>My Returns</h3>
+          <p>Request and track product returns</p>
+        </Link>
+
         <Link href="/account/addresses" className={styles.card}>
           <div className={styles.cardIcon}>📍</div>
           <h3>Addresses</h3>

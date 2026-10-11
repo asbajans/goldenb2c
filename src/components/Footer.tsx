@@ -41,6 +41,7 @@ export default function Footer() {
     { key: 'blog', href: '/blog', label: tc('blog') },
     { key: 'privacyPolicy', href: '/privacy-policy', label: t('privacyPolicy') },
     { key: 'termsOfService', href: '/terms-of-service', label: t('termsOfService') },
+    { key: 'returnsPolicy', href: '/returns-policy', label: t('returnsInfo') },
   ];
 
   return (

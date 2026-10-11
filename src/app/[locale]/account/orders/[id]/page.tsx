@@ -64,6 +64,11 @@ export default function OrderDetailPage() {
   const [error, setError] = useState('');
   const [cancelling, setCancelling] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [returns, setReturns] = useState<any[]>([]);
+  const [returnReason, setReturnReason] = useState('withdrawal');
+  const [returnNote, setReturnNote] = useState('');
+  const [tracking, setTracking] = useState('');
+  const [returnActing, setReturnActing] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -84,6 +89,7 @@ export default function OrderDetailPage() {
         if (res.ok) {
           const data = await res.json();
           setOrder(data);
+          fetchReturns(data.id);
         } else {
           setError('Order not found');
         }
@@ -92,6 +98,21 @@ export default function OrderDetailPage() {
         setError('Failed to load order');
       } finally {
         setLoading(false);
+      }
+    }
+
+    async function fetchReturns(orderId: string) {
+      try {
+        const token = localStorage.getItem('gc_token');
+        const res = await fetch(`/api/returns?orderId=${orderId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setReturns(data.data || []);
+        }
+      } catch {
+        // silent
       }
     }
 
@@ -143,6 +164,64 @@ export default function OrderDetailPage() {
   };
 
   const statusIdx = (s: string) => statusFlow.indexOf(s as typeof statusFlow[number]);
+
+  const authHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('gc_token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  };
+
+  const handleReturnRequest = async (orderItemId?: string) => {
+    if (!order) return;
+    setReturnActing(true);
+    try {
+      const res = await fetch('/api/returns', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ orderId: order.id, orderItemId, reason: returnReason, customerNote: returnNote })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Return request sent to the seller.');
+        setReturnNote('');
+        const r = await fetch(`/api/returns?orderId=${order.id}`, { headers: authHeaders() });
+        if (r.ok) setReturns((await r.json()).data || []);
+      } else {
+        alert(data.error || 'Failed to open return request');
+      }
+    } catch {
+      alert('Failed to open return request');
+    } finally {
+      setReturnActing(false);
+    }
+  };
+
+  const handleShipReturn = async (returnId: string) => {
+    setReturnActing(true);
+    try {
+      const res = await fetch(`/api/returns/${returnId}/ship`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ trackingNumber: tracking })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Tracking info sent to the seller.');
+        setTracking('');
+        if (order) {
+          const r = await fetch(`/api/returns?orderId=${order.id}`, { headers: authHeaders() });
+          if (r.ok) setReturns((await r.json()).data || []);
+        }
+      } else {
+        alert(data.error || 'Failed to send tracking info');
+      }
+    } catch {
+      alert('Failed to send tracking info');
+    } finally {
+      setReturnActing(false);
+    }
+  };
 
   if (authLoading || loading) {
     return <div className={styles.loading}><div className={styles.spinner} />Loading order...</div>;
@@ -310,6 +389,87 @@ export default function OrderDetailPage() {
               </button>
             </div>
           )}
+
+          {/* Returns */}
+          <div className={styles.card}>
+            <h2>Returns</h2>
+            {returns.length === 0 && order.status === 'delivered' && (
+              <>
+                <div className={styles.row}>
+                  <span>Reason</span>
+                  <select
+                    value={returnReason}
+                    onChange={e => setReturnReason(e.target.value)}
+                    style={{ maxWidth: 180 }}
+                  >
+                    <option value="withdrawal">Withdrawal (14 days)</option>
+                    <option value="defective">Defective product</option>
+                    <option value="wrong">Wrong product</option>
+                    <option value="incomplete">Incomplete product</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                {order.items && order.items.length > 1 && (
+                  <p style={{ fontSize: 13, color: '#666' }}>
+                    Multi-item order — the request below covers the whole order. For a single item, contact support.
+                  </p>
+                )}
+                <div className={styles.row}>
+                  <span>Note</span>
+                </div>
+                <textarea
+                  value={returnNote}
+                  onChange={e => setReturnNote(e.target.value)}
+                  rows={3}
+                  style={{ width: '100%', marginBottom: 8 }}
+                  placeholder="Optional note for the seller"
+                />
+                <button
+                  className={styles.payBtn}
+                  onClick={() => handleReturnRequest(order.items?.length === 1 ? order.items[0].id : undefined)}
+                  disabled={returnActing}
+                >
+                  {returnActing ? 'Sending...' : 'Request Return ↩️'}
+                </button>
+                <p style={{ fontSize: 12, color: '#666', marginTop: 8 }}>
+                  <Link href="/returns-policy">Return &amp; Refund Policy</Link>
+                </p>
+              </>
+            )}
+            {returns.map(r => (
+              <div key={r.id} className={styles.row}>
+                <span>{r.reason} — {r.status}</span>
+                <span>
+                  {r.status === 'approved' && (
+                    <span style={{ display: 'block' }}>
+                      <span style={{ fontSize: 12 }}>{r.returnAddress}</span>
+                      <span style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                        <input
+                          value={tracking}
+                          onChange={e => setTracking(e.target.value)}
+                          placeholder="Tracking no"
+                          style={{ flex: 1 }}
+                        />
+                        <button
+                          className={styles.payBtn}
+                          onClick={() => handleShipReturn(r.id)}
+                          disabled={returnActing}
+                        >
+                          Send
+                        </button>
+                      </span>
+                    </span>
+                  )}
+                  {r.status === 'pending' && <span style={{ fontSize: 12 }}>Waiting seller approval</span>}
+                  {r.status === 'refunded' && <span style={{ fontSize: 12 }}>Refunded ✓</span>}
+                  {r.status === 'rejected' && <span style={{ fontSize: 12 }}>Rejected by seller</span>}
+                </span>
+              </div>
+            ))}
+            {returns.length === 0 && order.status !== 'delivered' && (
+              <p style={{ fontSize: 13, color: '#666' }}>Returns open after delivery.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
