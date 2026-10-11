@@ -63,18 +63,30 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [slug, locale]);
 
-  // Fetch approved reviews from backend
+  // Fetch approved reviews from backend (locale-aware, 20s cap —
+  // backend caches translations, first view of a language may be slow)
   useEffect(() => {
     if (!product?.id) return;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 20000);
     setReviewsLoading(true);
-    fetch(`/api/reviews/product/${product.id}`)
+    fetch(`/api/reviews/product/${product.id}?lang=${locale}`, { signal: ctrl.signal })
       .then(r => r.json())
       .then(d => {
         if (d?.reviews) setReviews(d.reviews);
       })
-      .catch(console.error)
-      .finally(() => setReviewsLoading(false));
-  }, [product?.id]);
+      .catch(err => {
+        if (err?.name !== 'AbortError') console.error(err);
+      })
+      .finally(() => {
+        clearTimeout(timer);
+        setReviewsLoading(false);
+      });
+    return () => {
+      clearTimeout(timer);
+      ctrl.abort();
+    };
+  }, [product?.id, locale]);
 
   useEffect(() => {
     if (!user || !product?.id) return;
@@ -381,6 +393,7 @@ export default function ProductDetailPage() {
                       {review.title && <div className={styles.reviewTitle}>{review.title}</div>}
                       {review.comment && <div className={styles.reviewComment}>{review.comment}</div>}
                       {review.isVerifiedPurchase && <span className={styles.verifiedBadge}>Verified Purchase</span>}
+                      {review.translated && <span className={styles.verifiedBadge}>Translated</span>}
                     </div>
                   ))}
                 </div>
