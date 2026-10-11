@@ -90,7 +90,8 @@
     "applyFilters": "Aplicar Filtros",
     "showingResults": "Mostrando {count} resultados",
     "noProductsFound": "No se encontraron productos",
-    "tryDifferentFilters": "Intenta ajustar tus filtros"
+    "tryDifferentFilters": "Intenta ajustar tus filtros",
+    "featured": "Destacado"
   },
   "ProductDetail": {
     "productDetails": "Detalles del Producto",

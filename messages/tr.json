@@ -100,7 +100,8 @@
     "applyFilters": "Filtreleri Uygula",
     "showingResults": "{count} sonuç gösteriliyor",
     "noProductsFound": "Ürün bulunamadı",
-    "tryDifferentFilters": "Filtrelerinizi ayarlamayı deneyin"
+    "tryDifferentFilters": "Filtrelerinizi ayarlamayı deneyin",
+    "featured": "Öne Çıkan"
   },
   "ProductDetail": {
     "productDetails": "Ürün Detayları",

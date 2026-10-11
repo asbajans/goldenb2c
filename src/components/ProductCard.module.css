@@ -18,6 +18,22 @@
   border-color: var(--gold);
 }
 
+/* Doped (showcase) products: gold frame */
+.doped {
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 8px 24px rgba(212, 175, 55, 0.25);
+}
+
+.dopedBadge {
+  background: var(--gold-gradient);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
 /* Image */
 .imageContainer {
   position: relative;

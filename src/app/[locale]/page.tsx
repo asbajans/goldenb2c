@@ -75,31 +75,23 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [sliders.length]);
 
-  // Fetch categories, then fetch 6 newest products per category
+  // Fetch curated homepage sections (per-category fair quotas + rotation).
+  // Backend orders sections by category weight; each refresh reshuffles.
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`/api/categories?lang=${locale}`)
+    fetch(`/api/homepage?lang=${locale}&perCategory=6`)
       .then(r => r.json())
-      .then(async d => {
+      .then(d => {
         if (cancelled) return;
-        const cats = Array.isArray(d?.data) ? d.data.slice(0, 6) : [];
-        setCategories(cats);
-
-        // For each category fetch 6 newest products in parallel
-        const results = await Promise.all(
-          cats.map((cat: any) =>
-            fetch(`/api/products?category=${encodeURIComponent(cat.slug)}&limit=6&lang=${locale}`)
-              .then(r => r.json())
-              .then(data => ({ slug: cat.slug, products: Array.isArray(data?.data) ? data.data : [] }))
-              .catch(() => ({ slug: cat.slug, products: [] }))
-          )
-        );
-
-        if (cancelled) return;
+        const sections = Array.isArray(d?.sections) ? d.sections : [];
+        setCategories(sections.map((s: any) => ({ slug: s.slug, name: s.name })));
         const map: Record<string, any[]> = {};
         let totalCount = 0;
-        results.forEach(r => { map[r.slug] = r.products; totalCount += r.products.length; });
+        sections.forEach((s: any) => {
+          map[s.slug] = Array.isArray(s.products) ? s.products : [];
+          totalCount += map[s.slug].length;
+        });
         setCategoryProducts(map);
         setTotal(totalCount);
       })
@@ -222,6 +214,7 @@ export default function Home() {
                       slug={product.slug}
                       category={product._categoryName || product.category}
                       isNew={i < 2}
+                      isDoped={!!product.isDoped}
                       discountRate={product.discountRate}
                       discountedPrice={product.discountRate ? `₺${Number(Number(product.priceTRY) * (1 - product.discountRate / 100)).toLocaleString('tr-TR')}` : undefined}
                       discountedPriceUSD={product.discountRate ? `$${Number(Number(product.priceUSD || 0) * (1 - product.discountRate / 100)).toFixed(0)}` : undefined}
@@ -263,6 +256,7 @@ export default function Home() {
                         slug={product.slug}
                         category={product._categoryName || product.category}
                         isNew={i < 2}
+                      isDoped={!!product.isDoped}
                         discountRate={product.discountRate}
                         discountedPrice={product.discountRate ? `₺${Number(Number(product.priceTRY) * (1 - product.discountRate / 100)).toLocaleString('tr-TR')}` : undefined}
                         discountedPriceUSD={product.discountRate ? `$${Number(Number(product.priceUSD || 0) * (1 - product.discountRate / 100)).toFixed(0)}` : undefined}

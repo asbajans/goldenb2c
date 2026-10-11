@@ -90,7 +90,8 @@
     "applyFilters": "تطبيق الفلاتر",
     "showingResults": "عرض {count} نتيجة",
     "noProductsFound": "لم يتم العثور على منتجات",
-    "tryDifferentFilters": "جرب تعديل الفلاتر"
+    "tryDifferentFilters": "جرب تعديل الفلاتر",
+    "featured": "مميز"
   },
   "ProductDetail": {
     "productDetails": "تفاصيل المنتج",

@@ -14,12 +14,13 @@ export interface ProductCardProps {
   slug: string;
   category?: string;
   isNew?: boolean;
+  isDoped?: boolean;
   discountRate?: number;
   discountedPrice?: string;
   discountedPriceUSD?: string;
 }
 
-export default function ProductCard({ id, title, price, priceUSD, storeName, imageUrl, slug, category, isNew, discountRate, discountedPrice, discountedPriceUSD }: ProductCardProps) {
+export default function ProductCard({ id, title, price, priceUSD, storeName, imageUrl, slug, category, isNew, isDoped, discountRate, discountedPrice, discountedPriceUSD }: ProductCardProps) {
   const hasImage = imageUrl && imageUrl !== '/placeholder.jpg' && !imageUrl.startsWith('data:image');
 
   const locale = useLocale();
@@ -30,7 +31,7 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
   const displayPriceTRY = hasDiscount ? (discountedPrice || price) : price;
 
   return (
-    <Link href={`/${locale}/p/${slug}`} className={styles.card} id={`product-${id}`}>
+    <Link href={`/${locale}/p/${slug}`} className={`${styles.card} ${isDoped ? styles.doped : ''}`} id={`product-${id}`}>
       <div className={styles.imageContainer}>
         {hasImage ? (
           <Image
@@ -49,6 +50,7 @@ export default function ProductCard({ id, title, price, priceUSD, storeName, ima
         <div className={styles.overlay} />
         <div className={styles.badges}>
           {hasDiscount && <span className={styles.discountBadge}>-%{discountRate}</span>}
+          {isDoped && <span className={styles.dopedBadge}>✦ {tp('featured')}</span>}
           {isNew && <span className={styles.badgeNew}>{tp('newArrival')}</span>}
           {category && <span className={styles.badgeCat}>{category}</span>}
         </div>
