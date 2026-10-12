@@ -91,7 +91,10 @@
     "showingResults": "Visualizzati {count} risultati",
     "noProductsFound": "Nessun prodotto trovato",
     "tryDifferentFilters": "Prova a modificare i filtri",
-    "featured": "In Evidenza"
+    "featured": "In Evidenza",
+    "keywordSearch": "Ricerca per parola",
+    "keywordPlaceholder": "Scrivi una parola...",
+    "searchButton": "Cerca"
   },
   "ProductDetail": {
     "productDetails": "Dettagli Prodotto",

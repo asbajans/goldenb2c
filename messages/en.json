@@ -91,7 +91,10 @@
     "showingResults": "Showing {count} results",
     "noProductsFound": "No products found",
     "tryDifferentFilters": "Try adjusting your filters",
-    "featured": "Featured"
+    "featured": "Featured",
+    "keywordSearch": "Keyword search",
+    "keywordPlaceholder": "Type a word...",
+    "searchButton": "Search"
   },
   "ProductDetail": {
     "productDetails": "Product Details",

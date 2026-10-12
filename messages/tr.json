@@ -101,7 +101,10 @@
     "showingResults": "{count} sonuç gösteriliyor",
     "noProductsFound": "Ürün bulunamadı",
     "tryDifferentFilters": "Filtrelerinizi ayarlamayı deneyin",
-    "featured": "Öne Çıkan"
+    "featured": "Öne Çıkan",
+    "keywordSearch": "Kelime ile Ara",
+    "keywordPlaceholder": "Kelime yazın...",
+    "searchButton": "Ara"
   },
   "ProductDetail": {
     "productDetails": "Ürün Detayları",

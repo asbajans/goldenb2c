@@ -31,15 +31,19 @@ function ProductsContent() {
   const locale = useLocale();
   const router = useRouter();
 
-  // Sync activeCategory and search with URL searchParams on navigation (Header/Footer clicks)
+  // URL → state senkronu: TÜM filtreler (kategori, kelime, fiyat) URL'den
+  // okunur. Hiçbir filtre diğerini SIFIRLAMAZ — eskiden fiyat yazıp kategori
+  // seçince fiyat, kelime arayıp kategori seçince kelime siliniyordu.
   useEffect(() => {
     const urlType = searchParams.get('type') || '';
     const urlSearch = searchParams.get('search') || '';
-    setActiveCategory(urlType);
-    setSearch(urlSearch);
+    const urlMin = searchParams.get('minPrice') || '';
+    const urlMax = searchParams.get('maxPrice') || '';
+    setActiveCategory(prev => (prev !== urlType ? urlType : prev));
+    setSearch(prev => (prev !== urlSearch ? urlSearch : prev));
+    setMinPrice(prev => (prev !== urlMin ? urlMin : prev));
+    setMaxPrice(prev => (prev !== urlMax ? urlMax : prev));
     setPage(1);
-    setMinPrice('');
-    setMaxPrice('');
   }, [searchParams]);
 
   const limit = 24;
@@ -108,11 +112,26 @@ function ProductsContent() {
     setPage(1);
   }, [activeCategory, search, sort, minPrice, maxPrice]);
 
+  /** Tüm aktif filtreleri tek URL'de birleştirir — hiçbiri kaybolmaz. */
+  const buildUrl = (over: { type?: string; search?: string; min?: string; max?: string }) => {
+    const p = new URLSearchParams();
+    const t = over.type !== undefined ? over.type : activeCategory;
+    const s = over.search !== undefined ? over.search : search;
+    const mn = over.min !== undefined ? over.min : minPrice;
+    const mx = over.max !== undefined ? over.max : maxPrice;
+    if (t) p.set('type', t);
+    if (s) p.set('search', s);
+    if (mn) p.set('minPrice', mn);
+    if (mx) p.set('maxPrice', mx);
+    const q = p.toString();
+    return `/${locale}/products${q ? `?${q}` : ''}`;
+  };
+
   const handleCategory = (name: string) => {
     const next = name === activeCategory ? '' : name;
     setActiveCategory(next);
-    const url = next ? `/${locale}/products?type=${encodeURIComponent(next)}` : `/${locale}/products`;
-    router.replace(url);
+    // URL'yi TÜM aktif filtrelerle kur — kelime araması ve fiyat korunur.
+    router.replace(buildUrl({ type: next }));
   };
 
   const handlePriceFilter = () => {
@@ -123,6 +142,15 @@ function ProductsContent() {
       return;
     }
     setPriceError(false);
+    // URL'yi TÜM aktif filtrelerle kur — kategori ve kelime korunur.
+    router.replace(buildUrl({ min: minPrice, max: maxPrice }));
+    loadProducts();
+  };
+
+  const handleSearchApply = () => {
+    setPage(1);
+    // URL'yi TÜM aktif filtrelerle kur — kategori ve fiyat korunur.
+    router.replace(buildUrl({ search }));
     loadProducts();
   };
 
@@ -225,6 +253,24 @@ function ProductsContent() {
                 ))}
               </ul>
             )}
+          </div>
+
+          <div className={styles.sideSection}>
+            <h3 className={styles.sideTitle}>{t('keywordSearch')}</h3>
+            <div className={styles.priceInputs}>
+              <input
+                type="text"
+                placeholder={t('keywordPlaceholder')}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleSearchApply(); }}
+                className={styles.priceInput}
+                style={{ flex: 1 }}
+              />
+            </div>
+            <button onClick={handleSearchApply} className={styles.filterBtn}>
+              {t('searchButton')}
+            </button>
           </div>
 
           <div className={styles.sideSection}>
