@@ -16,13 +16,33 @@ const STATIC_PAGES: { path: string; freq: string; prio: string }[] = [
   { path: '/sellers/join', freq: 'monthly', prio: '0.5' },
 ];
 
+/** Her URL için 5 dil + x-default hreflang alternatifi */
+function alternates(path: string): string {
+  const links = LOCALES.map(
+    l => `<xhtml:link rel="alternate" hreflang="${l}" href="${SITE_URL}/${l}${path}"/>`
+  ).join('');
+  return `${links}<xhtml:link rel="alternate" hreflang="x-default" href="${SITE_URL}/en${path}"/>`;
+}
+
+function urlEntry(loc: string, freq: string, prio: string, lastmod?: string, altPath?: string): string {
+  const lm = lastmod ? `<lastmod>${lastmod}</lastmod>` : '';
+  const alt = altPath !== undefined ? alternates(altPath) : '';
+  return `  <url><loc>${loc}</loc>${lm}<changefreq>${freq}</changefreq><priority>${prio}</priority>${alt}</url>`;
+}
+
+function toDate(d: any): string | undefined {
+  if (!d) return undefined;
+  const t = new Date(d);
+  return isNaN(t.getTime()) ? undefined : t.toISOString().split('T')[0];
+}
+
 export async function GET() {
   const urls: string[] = [];
 
-  // 1. Static pages per locale
-  for (const locale of LOCALES) {
-    for (const page of STATIC_PAGES) {
-      urls.push(`  <url><loc>${SITE_URL}/${locale}${page.path}</loc><changefreq>${page.freq}</changefreq><priority>${page.prio}</priority></url>`);
+  // 1. Static pages per locale (hreflang'li)
+  for (const page of STATIC_PAGES) {
+    for (const locale of LOCALES) {
+      urls.push(urlEntry(`${SITE_URL}/${locale}${page.path}`, page.freq, page.prio, undefined, page.path));
     }
   }
 
@@ -46,25 +66,31 @@ export async function GET() {
     }
   }
 
-  // 4. Product pages from API
+  // 4. Product pages from API — sayfalı çekilir (tek istekteki limit
+  // backend tarafından kırpılabilir), her dilde + lastmod + hreflang.
+  // NOT: eski /p/{slug}/v/{id} varyant URL'leri route karşılığı olmadığı
+  // (404) için sitemap'e yazılmaz — ölü link Google güvenini düşürür.
   try {
-    const res = await fetch(`${BACKEND}/marketplace/products?page=1&limit=10000`, {
-      signal: AbortSignal.timeout(10000)
-    });
-    if (res.ok) {
+    const products: any[] = [];
+    const PAGE_SIZE = 1000;
+    for (let page = 1; page <= 50; page++) {
+      const res = await fetch(`${BACKEND}/marketplace/products?page=${page}&limit=${PAGE_SIZE}`, {
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) break;
       const data = await res.json();
-      const products: any[] = data?.data || data?.products || [];
+      const items: any[] = data?.data || data?.products || [];
+      products.push(...items);
+      if (items.length < PAGE_SIZE) break;
+    }
+    for (const product of products) {
+      const slug = product.slug || product.id;
+      if (!slug) continue;
+      // Slug'lar boşluk içerebiliyor (feed kaynaklı) — loc geçerli URL olmalı
+      const encSlug = encodeURIComponent(slug);
+      const lastmod = toDate(product.updatedAt);
       for (const locale of LOCALES) {
-        for (const product of products) {
-          const slug = product.slug || product.id;
-          urls.push(`  <url><loc>${SITE_URL}/${locale}/p/${slug}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`);
-          if (product.variants?.length) {
-            for (const v of product.variants) {
-              const vid = v.id || v.sku || v.name;
-              if (vid) urls.push(`  <url><loc>${SITE_URL}/${locale}/p/${slug}/v/${vid}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`);
-            }
-          }
-        }
+        urls.push(urlEntry(`${SITE_URL}/${locale}/p/${encSlug}`, 'weekly', '0.8', lastmod, `/p/${encSlug}`));
       }
     }
   } catch {}
@@ -80,16 +106,16 @@ export async function GET() {
       const active = (Array.isArray(posts) ? posts : [])
         .filter((p: any) => p && p.isActive !== false && p.id !== undefined)
         .slice(0, 500);
-      for (const locale of LOCALES) {
-        for (const post of active) {
-          urls.push(`  <url><loc>${SITE_URL}/${locale}/blog/${post.id}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>`);
+      for (const post of active) {
+        for (const locale of LOCALES) {
+          urls.push(urlEntry(`${SITE_URL}/${locale}/blog/${post.id}`, 'weekly', '0.6', toDate(post.updatedAt), `/blog/${post.id}`));
         }
       }
     }
   } catch {}
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls.join('\n')}
 </urlset>`;
 

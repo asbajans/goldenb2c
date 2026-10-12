@@ -86,6 +86,7 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [theme, setTheme] = useState<Theme>('auto');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -143,8 +144,14 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  // Close mobile menu on navigation
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  // Close mobile menu + search on navigation
+  useEffect(() => { setMobileOpen(false); setSearchOpen(false); }, [pathname]);
+
+  // Odak: mobilde arama açılınca klavye hemen gelsin, ayrıca
+  // dokunmatik hedef küçüklüğünden kaynaklı "tıklanmıyor" hissi kalkar.
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
 
   // Close user menu on click outside
   useEffect(() => {
@@ -169,7 +176,7 @@ export default function Header() {
 
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
-      <div className={styles.topBar}>
+      <div className={`${styles.topBar} ${searchOpen ? styles.searchExpanded : ''}`}>
         <div className={styles.container}>
 
           {/* Logo */}
@@ -194,7 +201,11 @@ export default function Header() {
                 placeholder="Search jewelry, gold, stores..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleSearch(e); }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') handleSearch(e);
+                  if (e.key === 'Escape') setSearchOpen(false);
+                }}
+                ref={searchInputRef}
                 className={styles.searchInput}
                 id="header-search"
               />
@@ -356,7 +367,11 @@ export default function Header() {
             <input
               type="text"
               placeholder="Search..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleSearch(e); }}
               className={styles.searchInput}
+              aria-label="Search"
             />
           </div>
           <div className={styles.mobileCats}>

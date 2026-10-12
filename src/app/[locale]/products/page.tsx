@@ -25,6 +25,9 @@ function ProductsContent() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  // Mobilde filtre paneli varsayılan AÇIK gelir — ürünlerin üstünde,
+  // sayfayla birlikte kayar; tek dokunuşla kapatılabilir.
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [priceError, setPriceError] = useState(false);
@@ -221,8 +224,17 @@ function ProductsContent() {
         </div>
       </div>
 
+      <button
+        type="button"
+        className={styles.filterToggle}
+        onClick={() => setFiltersOpen(o => !o)}
+        aria-expanded={filtersOpen}
+      >
+        {filtersOpen ? '▲' : '▼'} {t('filters')}
+      </button>
+
       <div className={styles.layout}>
-        <aside className={styles.sidebar}>
+        <aside className={`${styles.sidebar} ${filtersOpen ? '' : styles.sidebarHidden}`}>
           <div className={styles.sideSection}>
             <h3 className={styles.sideTitle}>{tc('categories')}</h3>
             {catLoading ? (

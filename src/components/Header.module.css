@@ -490,3 +490,39 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Mobil genişletilmiş arama ─────────────────────────────
+   Büyüteç ikonuna dokununca arama çubuğu kalabalık üst satıra
+   sıkışmak yerine tam genişlikte ikinci satıra iner: dokunmatik
+   hedef büyür, yazı alanı rahatça tıklanabilir olur. */
+@media (max-width: 900px) {
+  .searchExpanded .container {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 54px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    row-gap: 8px;
+  }
+
+  .searchExpanded .searchWrap {
+    display: flex;
+    flex: 1 1 100%;
+    order: 10;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .searchExpanded .searchBox {
+    width: 100%;
+    padding: 0.7rem 1rem;
+  }
+
+  /* 16px altı font iOS'ta odağı bozup sayfayı yakınlaştırır */
+  .searchExpanded .searchInput,
+  .mobileSearchBox .searchInput {
+    font-size: 16px;
+    width: 100%;
+  }
+}
