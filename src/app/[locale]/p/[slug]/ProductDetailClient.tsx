@@ -46,6 +46,7 @@ export function ProductDetailClient() {
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [adding, setAdding] = useState(false);
+  const [selectedStoneId, setSelectedStoneId] = useState<string | null>(null);
   const { addItem } = useCart();
   const { user } = useAuth();
   const [inWishlist, setInWishlist] = useState(false);
@@ -126,6 +127,15 @@ export function ProductDetailClient() {
   const discountedPrice = hasDiscount ? Number(price) * (1 - discountRate / 100) : null;
   const discountedPriceUSD = hasDiscount ? Number(priceUSD || 0) * (1 - discountRate / 100) : null;
   const variants: any[] = product.variants || [];
+  const allStones: any[] = Array.isArray((product as any).stones) ? (product as any).stones : [];
+  const fixedStones = allStones.filter((s: any) => s.isFixed);
+  const stones: any[] = allStones.filter((s: any) => !s.isFixed);
+  const selectedStone = stones.find((s: any) => s.id === selectedStoneId) || null;
+  const stoneTRY = selectedStone ? Number(selectedStone.priceTRY) || 0 : 0;
+  const stoneUSD = selectedStone ? Number(selectedStone.priceUSD) || 0 : 0;
+  const stoneLabel = selectedStone
+    ? [selectedStone.gemstoneName, selectedStone.carat ? `${selectedStone.carat}ct` : '', selectedStone.cut || '', selectedStone.quality || ''].filter(Boolean).join(' ')
+    : undefined;
 
   // Group variant attributes for display
   const variantKeys: string[] = variants.length
@@ -237,27 +247,27 @@ export function ProductDetailClient() {
             </a>
           )}
 
-          {/* Price */}
+          {/* Price (stone selection added on top, undiscounted) */}
           <div className={styles.priceBlock}>
             {hasDiscount ? (
               <>
                 <div className={styles.priceMain}>
-                  ${Number(discountedPriceUSD).toFixed(2)} USD
+                  ${(Number(discountedPriceUSD) + stoneUSD).toFixed(2)} USD
                 </div>
-                <div className={styles.priceOld}>${Number(priceUSD).toFixed(2)} USD</div>
+                <div className={styles.priceOld}>${(Number(priceUSD) + stoneUSD).toFixed(2)} USD</div>
                 <div className={styles.priceDiscountBadge}>-%{discountRate} indirim</div>
                 <div className={styles.priceSub}>
-                  ≈ {Number(discountedPrice).toLocaleString('tr-TR')} ₺
-                  <span className={styles.priceOldTRY}> {Number(price).toLocaleString('tr-TR')} ₺</span>
+                  ≈ {(Number(discountedPrice) + stoneTRY).toLocaleString('tr-TR')} ₺
+                  <span className={styles.priceOldTRY}> {(Number(price) + stoneTRY).toLocaleString('tr-TR')} ₺</span>
                 </div>
               </>
             ) : (
               <>
                 {priceUSD && (
-                  <div className={styles.priceMain}>${Number(priceUSD).toFixed(2)} USD</div>
+                  <div className={styles.priceMain}>${(Number(priceUSD) + stoneUSD).toFixed(2)} USD</div>
                 )}
                 {price && (
-                  <div className={styles.priceSub}>≈ {Number(price).toLocaleString('tr-TR')} ₺</div>
+                  <div className={styles.priceSub}>≈ {(Number(price) + stoneTRY).toLocaleString('tr-TR')} ₺</div>
                 )}
               </>
             )}
@@ -288,6 +298,51 @@ export function ProductDetailClient() {
             );
           })}
 
+          {/* Stones (customer selection adds to total) */}
+          {stones.length > 0 && (
+            <div className={styles.variantGroup}>
+              <h4 className={styles.variantLabel}>Taş Seçimi</h4>
+              <div className={styles.variantBtns}>
+                <button
+                  className={`${styles.variantBtn} ${!selectedStone ? styles.variantBtnActive : ''}`}
+                  onClick={() => setSelectedStoneId(null)}
+                >
+                  No stone
+                </button>
+                {stones.map((s: any) => {
+                  const label = [s.gemstoneName, s.carat ? `${s.carat}ct` : '', s.cut || '', s.quality || ''].filter(Boolean).join(' ');
+                  const extra = Number(s.priceTRY) > 0 ? ` (+₺${Number(s.priceTRY).toLocaleString('tr-TR')})` : '';
+                  return (
+                    <button
+                      key={s.id}
+                      className={`${styles.variantBtn} ${selectedStoneId === s.id ? styles.variantBtnActive : ''}`}
+                      onClick={() => setSelectedStoneId(s.id)}
+                    >
+                      {label}{extra}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Fixed stones (included, info only) */}
+          {fixedStones.length > 0 && (
+            <div className={styles.variantGroup}>
+              <h4 className={styles.variantLabel}>Taşlar (Dahil)</h4>
+              <div className={styles.variantBtns}>
+                {fixedStones.map((s: any) => {
+                  const label = [s.gemstoneName, s.carat ? `${s.carat}ct` : '', s.cut || '', s.quality || ''].filter(Boolean).join(' ');
+                  return (
+                    <span key={s.id} className={`${styles.variantBtn} ${styles.variantBtnActive}`}>
+                      {label}{s.quantity > 1 ? ` x${s.quantity}` : ''}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* CTA */}
           <div className={styles.actions}>
             <button 
@@ -297,11 +352,13 @@ export function ProductDetailClient() {
                 if (!product) return;
                 setAdding(true);
                 try {
-      const cartUnitPrice = parseFloat(price) || 0;
-      const cartDiscountedPrice = hasDiscount ? parseFloat(String(discountedPrice)) : undefined;
+      const cartUnitPrice = (parseFloat(price) || 0) + stoneTRY;
+      const cartDiscountedPrice = hasDiscount ? (parseFloat(String(discountedPrice)) || 0) + stoneTRY : undefined;
       await addItem({
         productId: product.id,
         variantId: selectedVariant?.id,
+        productStoneId: selectedStone?.id,
+        stoneLabel,
         title: product.title,
         sku: selectedVariant?.sku || product.sku || '',
         quantity: 1,
@@ -414,6 +471,11 @@ export function ProductDetailClient() {
             {product.sku && (
               <div className={styles.spec}><span>SKU</span><strong>{product.sku}</strong></div>
             )}
+            {product.specs && typeof product.specs === 'object' && Object.entries(product.specs)
+              .filter(([k, v]) => k !== 'ÜRÜN KODU' && v !== '' && v != null)
+              .map(([k, v]) => (
+                <div className={styles.spec} key={k}><span>{k}</span><strong>{String(v)}</strong></div>
+              ))}
           </div>
 
           {/* Trust */}

@@ -46,10 +46,11 @@ export async function POST(request: NextRequest) {
     
     if (body.action === 'add') {
       endpoint = BACKEND + '/cart/add';
-      reqBody = { 
-        productId: body.productId, 
-        variantId: body.variantId || null, 
-        quantity: body.quantity || 1 
+      reqBody = {
+        productId: body.productId,
+        variantId: body.variantId || null,
+        productStoneId: body.productStoneId || null,
+        quantity: body.quantity || 1
       };
     } else if (body.action === 'checkout') {
       if (IS_OFFLINE) {

@@ -6,6 +6,8 @@ interface CartItem {
   id?: string;
   productId: string;
   variantId?: string;
+  productStoneId?: string;
+  stoneLabel?: string;
   title: string;
   sku: string;
   quantity: number;
@@ -103,7 +105,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       let items: CartItem[] = stored ? JSON.parse(stored).items || [] : [];
       
       const existingIndex = items.findIndex(
-        item => item.productId === productData.productId && item.variantId === productData.variantId
+        item => item.productId === productData.productId && item.variantId === productData.variantId && item.productStoneId === productData.productStoneId
       );
 
       if (existingIndex >= 0) {
@@ -114,6 +116,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           id: generateId(),
           productId: productData.productId,
           variantId: productData.variantId,
+          productStoneId: productData.productStoneId,
+          stoneLabel: productData.stoneLabel,
           title: productData.title,
           sku: productData.sku,
           quantity: productData.quantity || 1,
