@@ -183,6 +183,11 @@
 }
 .variantBtn:hover { border-color: var(--gold); color: var(--gold); }
 .variantBtnActive { border-color: var(--gold) !important; background: var(--gold-pale) !important; color: var(--gold) !important; box-shadow: var(--gold-glow); }
+.stoneProps {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
 
 /* Actions */
 .actions {

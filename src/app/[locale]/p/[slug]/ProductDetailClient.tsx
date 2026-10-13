@@ -130,7 +130,8 @@ export function ProductDetailClient() {
   const allStones: any[] = Array.isArray((product as any).stones) ? (product as any).stones : [];
   const fixedStones = allStones.filter((s: any) => s.isFixed);
   const stones: any[] = allStones.filter((s: any) => !s.isFixed);
-  const selectedStone = stones.find((s: any) => s.id === selectedStoneId) || null;
+  const effectiveStoneId = selectedStoneId || (stones.length > 0 ? stones[0].id : null);
+  const selectedStone = stones.find((s: any) => s.id === effectiveStoneId) || null;
   const stoneTRY = selectedStone ? Number(selectedStone.priceTRY) || 0 : 0;
   const stoneUSD = selectedStone ? Number(selectedStone.priceUSD) || 0 : 0;
   const stoneLabel = selectedStone
@@ -298,24 +299,18 @@ export function ProductDetailClient() {
             );
           })}
 
-          {/* Stones (customer selection adds to total) */}
+          {/* Stones (required choice when offered, adds to total) */}
           {stones.length > 0 && (
             <div className={styles.variantGroup}>
               <h4 className={styles.variantLabel}>Taş Seçimi</h4>
               <div className={styles.variantBtns}>
-                <button
-                  className={`${styles.variantBtn} ${!selectedStone ? styles.variantBtnActive : ''}`}
-                  onClick={() => setSelectedStoneId(null)}
-                >
-                  No stone
-                </button>
                 {stones.map((s: any) => {
                   const label = [s.gemstoneName, s.carat ? `${s.carat}ct` : '', s.cut || '', s.quality || ''].filter(Boolean).join(' ');
                   const extra = Number(s.priceTRY) > 0 ? ` (+₺${Number(s.priceTRY).toLocaleString('tr-TR')})` : '';
                   return (
                     <button
                       key={s.id}
-                      className={`${styles.variantBtn} ${selectedStoneId === s.id ? styles.variantBtnActive : ''}`}
+                      className={`${styles.variantBtn} ${effectiveStoneId === s.id ? styles.variantBtnActive : ''}`}
                       onClick={() => setSelectedStoneId(s.id)}
                     >
                       {label}{extra}
@@ -323,6 +318,11 @@ export function ProductDetailClient() {
                   );
                 })}
               </div>
+              {selectedStone && (
+                <div className={styles.stoneProps}>
+                  {[selectedStone.carat ? `${selectedStone.carat}ct` : '', selectedStone.cut || '', selectedStone.quality || '', selectedStone.quantity > 1 ? `${selectedStone.quantity} adet` : ''].filter(Boolean).join(' • ')}
+                </div>
+              )}
             </div>
           )}
 
